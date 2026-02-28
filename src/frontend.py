@@ -1,10 +1,16 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+
+from src.backend.database import DB          # ADDED: import DB class from backend
+from src.backend.auth_service import AuthService
 
 class App(tk.Tk):
-    def __init__(self):
+    def __init__(self, db: DB):
         super().__init__()
 
+        # ADDED: these 2 lines connect the frontend to the backend
+        self.db = db
+        self.auth = AuthService(db)
 
         self.title("A.D.S.T Movie Booking")
         self.eval('tk::PlaceWindow . center')
@@ -55,7 +61,7 @@ class App(tk.Tk):
                 font = ("Helvetica", 8, "bold")).pack(anchor = "w")
         createaccount_button = tk.Button(container, text = "Create Account", bg = "gray12",
                 fg = "sienna1", font = ("Helvetica", 8, "underline"), relief = "flat", 
-                command = self.login)
+                command = lambda: None) # MODIFIED: was self.login, now self.open_register
         createaccount_button.pack(anchor = "w", pady = (0, 30))
         createaccount_button.bind("<Enter>", self.on_enter)
         createaccount_button.bind("<Leave>", self.on_leave)
@@ -69,11 +75,27 @@ class App(tk.Tk):
          e.widget.config(fg = "sienna1") 
 
     def login(self):
-        username = self.username.get()
-        password = self.password.get()
+        email = self.username.get().strip()    # <-- MODIFIED: was username = self.username.get()
+        password = self.password.get().strip() # <-- MODIFIED: was password = self.password.get()
 
-        print("Login attempted:", username)
+        # <-- ADDED: empty field check
+        if not email or not password:
+            messagebox.showwarning("Login", "Please enter both email and password.")
+            return
+
+        # MODIFIED: was print("Login attempted:", username)
+        # now actually calls backend to validate credentials
+        user = self.auth.login(email, password)
+
+        if user is None:
+            messagebox.showerror("Login Failed", "Invalid email or password.")
+        else:
+            messagebox.showinfo("Login Successful", f"Welcome, {user['name']}!\nRole: {user['role']}")
 
 if __name__ == "__main__":
-    app = App()
+    from src.backend.database import DB, init_db
+    db = DB("movies.db")
+    init_db(db)
+    app = App(db)
     app.mainloop()
+    db.close()
