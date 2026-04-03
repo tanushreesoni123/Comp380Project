@@ -1,6 +1,6 @@
 import sqlite3
 from src.backend.database import DB
-from src.backend.utils import sha256, now_iso
+from src.utils import sha256, now_iso
 
 class AuthService:
     def __init__(self, db: DB):

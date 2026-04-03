@@ -1,5 +1,5 @@
 import sqlite3
-from src.backend.utils import sha256, now_iso
+from src.utils import sha256, now_iso
 
 class DB:
     def __init__(self, path: str):
