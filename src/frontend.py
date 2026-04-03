@@ -4,6 +4,7 @@ from tkinter import ttk, messagebox
 from src.backend.database import DB          # ADDED: import DB class from backend
 from src.backend.auth_service import AuthService
 
+
 class App(tk.Tk):
     def __init__(self, db: DB):
         super().__init__()
@@ -30,42 +31,51 @@ class App(tk.Tk):
         style = ttk.Style(self)
         style.theme_use("classic")
 
-        container = tk.Frame(self, bg="gray12", padx=25, pady=25)
-        container.pack(expand = True, padx=40, pady=40)
+        self.container = tk.Frame(self, bg="gray12", padx=30, pady=30)
+        self.container.pack(expand = True, fill = "both", padx=40, pady=40)
 
-        title = tk.Label(container, text = " LOGIN ", bg = "gray12", fg="#f5f5f5", 
+        self.show_login()
+
+
+
+    def show_login(self):
+        self.clear_container()    
+        title = tk.Label(self.container, text = " LOGIN ", bg = "gray12", fg="#f5f5f5", 
                 font = ("Helvetica", 20, "bold"))
-        title.pack(pady = (8,23))
+        title.pack(pady = (50,23))
 
 
-        tk.Label(container, text="EMAIL ADDRESS*", bg = "gray12", fg="#f5f5f5",
-                font = ("Helvetica", 8, "bold")).pack(anchor = "w")
-        self.username = tk.Entry(container, width = 30, bg = "gainsboro", borderwidth=0, 
+        tk.Label(self.container, text="EMAIL ADDRESS*", bg = "gray12", fg="#f5f5f5",
+                font = ("Helvetica", 8, "bold")).pack(anchor = "w", padx = (125,125))
+        self.username = tk.Entry(self.container, width = 30, bg = "gainsboro", borderwidth=0, 
                         highlightthickness = 1, highlightbackground = "gray40")
-        self.username.pack(fill = "x", pady = (0,10))
+        self.username.pack(anchor = "w", padx = (125,125), pady = (0,10))
         
-        tk.Label(container, text="PASSWORD*",  bg = "gray12", fg="#f5f5f5", 
-                font = ("Helvetica", 8, "bold")).pack(anchor = "w")
-        self.password = tk.Entry(container, width = 30, bg = "gainsboro", show = "*", 
+        tk.Label(self.container, text="PASSWORD*",  bg = "gray12", fg="#f5f5f5", 
+                font = ("Helvetica", 8, "bold")).pack(anchor = "w", padx = (125,125))
+        self.password = tk.Entry(self.container, width = 30, bg = "gainsboro", show = "*", 
                         borderwidth=0, highlightthickness = 1, highlightbackground = "gray40")
-        self.password.pack(fill = "x", pady = (0,10))
+        self.password.pack(anchor = 'w', padx = (125,125), pady = (0,10))
         
-        login_button = tk.Button(container, text = "LOG IN", bg = "sienna1", fg = "gray12", 
+        login_button = tk.Button(self.container, text = "LOG IN", bg = "sienna1", fg = "gray12", 
                        font = ("Helvetica", 10, "bold"), borderwidth=0, highlightthickness = 1,
                        highlightbackground = "gray40", command = self.login)
-        login_button.pack(fill = "x", pady = (10,8))
+        login_button.pack(anchor = 'w', padx = (125,125), pady = (10,8))
     
 
 
-        tk.Label(container, text="Don't have an account?",  bg = "gray12", fg="#f5f5f5",
-                font = ("Helvetica", 8, "bold")).pack(anchor = "w")
-        createaccount_button = tk.Button(container, text = "Create Account", bg = "gray12",
+        tk.Label(self.container, text="Don't have an account?",  bg = "gray12", fg="#f5f5f5",
+                font = ("Helvetica", 8, "bold")).pack(anchor = "w", padx = (125,125))
+        createaccount_button = tk.Button(self.container, text = "Create Account", bg = "gray12",
                 fg = "sienna1", font = ("Helvetica", 8, "underline"), relief = "flat", 
                 command = lambda: None) # MODIFIED: was self.login, now self.open_register
-        createaccount_button.pack(anchor = "w", pady = (0, 30))
+        createaccount_button.pack(anchor = "w", padx = (125,125), pady = (0, 30))
         createaccount_button.bind("<Enter>", self.on_enter)
         createaccount_button.bind("<Leave>", self.on_leave)
 
+    def clear_container(self):
+        for widget in self.container.winfo_children():
+            widget.destroy()
 
     def on_enter(self, e):
          e.widget.config(fg = "lightsalmon")
@@ -78,6 +88,10 @@ class App(tk.Tk):
         email = self.username.get().strip()    # <-- MODIFIED: was username = self.username.get()
         password = self.password.get().strip() # <-- MODIFIED: was password = self.password.get()
 
+
+    def show_movie_list(movie_user):
+        self.clear_container()
+        build_movie_list(self.container, self, user)
         # <-- ADDED: empty field check
         if not email or not password:
             messagebox.showwarning("Login", "Please enter both email and password.")
@@ -90,7 +104,8 @@ class App(tk.Tk):
         if user is None:
             messagebox.showerror("Login Failed", "Invalid email or password.")
         else:
-            messagebox.showinfo("Login Successful", f"Welcome, {user['name']}!\nRole: {user['role']}")
+            messagebox.showinfo("Login Successful", f"Welcome, {user['name']}!")
+            self.show_movie_list(user)
 
 if __name__ == "__main__":
     from src.backend.database import DB, init_db
