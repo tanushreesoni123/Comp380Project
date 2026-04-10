@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
+from datetime import datetime, timedelta
 
 from src.backend.database import DB
 
@@ -101,6 +102,7 @@ class CustomerWindow(tk.Frame):
     #to ensure our button/movie can be selected
     def select_movie(self, movie):
         print("selected:", movie["title"])
+        ShowtimePopup(self.master, movie)
 
 #creates various cards using images/title (they're buttons that can be clicked on)
 class MovieCard(tk.Frame):
@@ -118,6 +120,10 @@ class MovieCard(tk.Frame):
                                       fg = "white", command = self.handle_click)
         self.image_button.grid(row = 0, column = 0, rowspan = 2, padx = (0,15), sticky ="n")
 
+        # Add hover effect
+        self.image_button.bind("<Enter>", self.on_enter)
+        self.image_button.bind("<Leave>", self.on_leave)
+
         self.movie_titles = tk.Label(self, text = movie["title"], bg = "gray17", fg = "sienna1",
                                     font = ("Helvetica", 14, "bold"), justify = "left", anchor = "center")
         self.movie_titles.grid(row =0, column = 1, sticky = "w")
@@ -129,4 +135,127 @@ class MovieCard(tk.Frame):
     def handle_click(self):
         self.on_click(self.movie)
 
+    def on_enter(self, event):
+        self.image_button.config(bg="sienna1")
+
+    def on_leave(self, event):
+        self.image_button.config(bg="gray11")
+
+
+class ShowtimePopup(tk.Toplevel):
+    def __init__(self, parent, movie):
+        super().__init__(parent, bg="gray12")
+        self.movie = movie
+        self.selected_showtime = None
+        self.title(f"{movie['title']} - Select Showtime")
+        self.geometry("400x350")
+        self.configure(bg="gray12")
+        
+        # Center the popup window
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() // 2) - (400 // 2)
+        y = (self.winfo_screenheight() // 2) - (350 // 2)
+        self.geometry(f"+{x}+{y}")
+        
+        self.main_frame = tk.Frame(self, bg="gray12")
+        self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        self._build_ui()
+    
+    def _build_ui(self):
+        # Clear previous widgets
+        for widget in self.main_frame.winfo_children():
+            widget.destroy()
+        
+        # Title label
+        title_label = tk.Label(self.main_frame, text=f"{self.movie['title']}", 
+                              bg="gray12", fg="sienna1", 
+                              font=("Helvetica", 16, "bold"))
+        title_label.pack(pady=15)
+        
+        if self.selected_showtime is None:
+            # Show showtimes selection
+            showtimes_label = tk.Label(self.main_frame, text="Available Showtimes:", 
+                                      bg="gray12", fg="white",
+                                      font=("Helvetica", 12, "bold"))
+            showtimes_label.pack(anchor="w", pady=(10, 5))
+            
+            # Generate 5 sample showtimes
+            showtimes = self._generate_showtimes()
+            
+            # Create buttons for each showtime
+            for showtime in showtimes:
+                btn = tk.Button(self.main_frame, text=showtime, 
+                               bg="gray17", fg="sienna1",
+                               font=("Helvetica", 11),
+                               width=25,
+                               command=lambda st=showtime: self._select_showtime(st))
+                btn.pack(pady=5)
+                
+                # Hover effect
+                btn.bind("<Enter>", lambda e, b=btn: b.config(bg="sienna1", fg="gray12"))
+                btn.bind("<Leave>", lambda e, b=btn: b.config(bg="gray17", fg="sienna1"))
+        else:
+            # Show selected showtime and seat selection option
+            selected_label = tk.Label(self.main_frame, text="Selected Showtime:", 
+                                     bg="gray12", fg="white",
+                                     font=("Helvetica", 12, "bold"))
+            selected_label.pack(pady=(10, 5))
+            
+            time_display = tk.Label(self.main_frame, text=self.selected_showtime, 
+                                   bg="gray17", fg="sienna1",
+                                   font=("Helvetica", 14, "bold"),
+                                   padx=10, pady=10)
+            time_display.pack(pady=15, fill="x")
+            
+            # Select Seats button
+            seats_btn = tk.Button(self.main_frame, text="Select Seats", 
+                                 bg="sienna1", fg="gray12",
+                                 font=("Helvetica", 12, "bold"),
+                                 padx=20, pady=10,
+                                 command=self._select_seats)
+            seats_btn.pack(pady=20)
+            
+            # Hover effect for seats button
+            seats_btn.bind("<Enter>", lambda e, b=seats_btn: b.config(bg="lightsalmon"))
+            seats_btn.bind("<Leave>", lambda e, b=seats_btn: b.config(bg="sienna1"))
+            
+            # Go Back button
+            back_btn = tk.Button(self.main_frame, text="Go Back", 
+                                bg="gray17", fg="sienna1",
+                                font=("Helvetica", 10),
+                                command=self._go_back)
+            back_btn.pack(pady=5)
+            
+            # Hover effect for back button
+            back_btn.bind("<Enter>", lambda e, b=back_btn: b.config(bg="sienna1", fg="gray12"))
+            back_btn.bind("<Leave>", lambda e, b=back_btn: b.config(bg="gray17", fg="sienna1"))
+        
+        # Close button (always visible)
+        close_btn = tk.Button(self.main_frame, text="Close", 
+                            bg="gray17", fg="white",
+                            font=("Helvetica", 10),
+                            command=self.destroy)
+        close_btn.pack(pady=10)
+    
+    def _generate_showtimes(self):
+        """Generate 5 sample showtimes"""
+        times = ["2:00 PM", "4:30 PM", "7:00 PM", "9:30 PM", "11:00 PM"]
+        return times
+    
+    def _select_showtime(self, showtime):
+        """Handle showtime selection"""
+        self.selected_showtime = showtime
+        self._build_ui()
+    
+    def _go_back(self):
+        """Go back to showtime selection"""
+        self.selected_showtime = None
+        self._build_ui()
+    
+    def _select_seats(self):
+        """Handle seat selection"""
+        messagebox.showinfo("Seats", 
+                          f"Proceeding to seat selection for {self.movie['title']} at {self.selected_showtime}")
+        self.destroy()
     
