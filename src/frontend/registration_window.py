@@ -4,8 +4,47 @@ from src.backend.services.auth_service import AuthService
 
 
 class RegistrationWindow(tk.Frame):
+    
+    """
+    Class Name: RegistrationWindow
+    Date: 04-16-2026
+    Programmer: Allison Berkeland
+
+    Description: This class creates the user registration interface
+    for the movie booking application. It allows for new users to input 
+    their name, email, and password to create an account. The class also 
+    handles frontend validation and communicates with the backend authentication
+    to register the user.
+
+    Functions:
+    - _build_ui(): Constructs the registration form UI elements.
+    - _do_register(): Handles the validity of the user input and registration logic
+    - _go_back(): Sends the user back to the login screen       
+
+    Inputs:
+    - master: parent window/frame
+    - db: database connection object for authentication
+
+    Outputs:
+    - None (GUI-based interactions)
+
+    Data Structures:
+    - Uses Tkinter widgets to collect user input
+    - Uses strings to store user information (name, email, password)
+
+    Algorthims:
+    - Input validation:
+        - Check for empty fields
+        - Check if password and confirm password match
+    """
+
 
     def __init__(self, master, db):
+
+        """
+        Initializes the registration window and sets up dependencies.
+
+        """
         super().__init__(master, bg="gray12")
         self.db = db
         self.auth = AuthService(db)
@@ -13,6 +52,10 @@ class RegistrationWindow(tk.Frame):
         self.pack(fill="both", expand=True)
 
     def _build_ui(self):
+        """
+        Builds the user interface for the registration form, including
+        input fields, buttons, labels, and error message display.
+        """
         container = tk.Frame(self, bg="gray12", padx=25, pady=25)
         container.pack(expand=True, padx=40, pady=40)
 
@@ -69,6 +112,16 @@ class RegistrationWindow(tk.Frame):
                 expand=True, padx=(6, 0))
 
     def _do_register(self):
+        """
+        Handles the registration process.
+
+        Steps:
+        1. Retrive user input from entry fields.
+        2. Perform frontend validation (empty fields, passwords match)
+        3. Call backend authentication service.
+        4. Display success or error messages.
+        """
+
         name = self.name_entry.get().strip()
         email = self.email_entry.get().strip()
         password = self.password_entry.get()
@@ -94,6 +147,10 @@ class RegistrationWindow(tk.Frame):
             self.message_label.config(text=msg)
 
     def _go_back(self):
+        """
+        Returns the user to login screen.
+        Destroys the current window and initializes the login interface.
+        """
         # go back to login screen
         from .login_window import LoginWindow
         master = self.master

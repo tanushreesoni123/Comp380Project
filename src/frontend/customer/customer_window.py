@@ -5,8 +5,36 @@ from datetime import datetime, timedelta
 
 from src.backend.database import DB
 
+"""
+    The customer window for browsing available movies.
+    This frame allows customers to view movie posters,
+    titles, and descriptions. It also allows movie
+    selection through the UI.
+    Author: D. Tinoco
+
+
+"""
+
+
 class CustomerWindow(tk.Frame):
+    """
+    The primary customer window for browsing available movies.
+    The interface is scrollable, displays movie details, and permits
+    movie selection.
+    """
+
+    
     def __init__(self, master, db, user):
+        """
+        Constructs/initializes the customer window.
+
+
+        Parameters:
+            master: Parent Tkinter widget
+            db: Database connector
+            user: Current user
+        """
+
         super().__init__(master, bg = "gray12")
 
         self.db =db
@@ -30,6 +58,17 @@ class CustomerWindow(tk.Frame):
 
 
     def build_ui(self):
+        """
+        Builds the movie browsing UI.
+
+
+        Constructs the outer container, canvas,
+        scrollbar, and the frame that can be scrolled through
+        to show the available movies/movie cards.
+
+
+        """
+
         self.configure(bg = "gray12")
 
         movie_list_container = tk.Frame(self, bg=  "gray13")
@@ -97,16 +136,43 @@ class CustomerWindow(tk.Frame):
             card.pack(fill="x", padx=10, pady=10)
 
     def new_scroll_frame(self,event):
+        """
+        Alters the scrollable frame to fit the canvas window and width size.
+        Parameters:
+            event: Tkinter configuring event
+
+        """
         self.canvas.itemconfig(self.canvas_window, width = event.width)
 
     #to ensure our button/movie can be selected
     def select_movie(self, movie):
+        """
+        A tester method to show that the button is functioning
+        """
+
         print("selected:", movie["title"])
         ShowtimePopup(self.master, movie)
 
 #creates various cards using images/title (they're buttons that can be clicked on)
 class MovieCard(tk.Frame):
+    """
+    The UI that represents / stores individual movie cards. Each
+    movie card includes a poster, title, and description. Each is clickable
+    to enable movie selection.
+    Author: D. Tinoco
+    """
+
     def __init__(self, parent, movie, on_click):
+        """
+        Initializes a movie card
+
+
+        Parameters:
+            parent: Parent Tkinter widget
+            movie: dictionary containing movie info
+            on_click: A function that is called when movie card is selected
+        """
+
         super().__init__(parent, bg = "gray17", padx = 10, pady = 10)
          
         self.movie = movie
@@ -143,7 +209,40 @@ class MovieCard(tk.Frame):
 
 
 class ShowtimePopup(tk.Toplevel):
+    """
+    Class Name: ShowtimePopup
+    Date: 04-17-2026
+    Programmer: Allison Berkeland
+
+    Descripton: This class creates a popup window for customers
+      to select showtimes for a chosen movie. It displays the movie 
+      title, available showtimes, and allows the user to select a 
+      showtime or go back to the movie selection screen.
+      
+      Functions:
+        - _build_ui(): Constructs the UI elements for showtime selection
+        - _generate_showtimes(): Returns list of available showtimes
+        - _select_showtime(showtime): Stores selected hsowtime and updates UI
+        - _go_back(): Returns to showtime selection screen
+        - _sleect_seats(): Proceeds to seat selection
+
+        Inputs:
+        - parent: parent window
+        - movie: dictionary containing movie details
+
+        Data Structures:
+         - Uses a list of strings to store showtimes
+         - Stores selected showtime as a string
+
+         Algorithms:
+         - UI state update logic:
+            Rebuilds the interface depending if a showtime has been selected
+            or not.
+    """
     def __init__(self, parent, movie):
+        """
+        Initializes the popup window and sets intial state.
+        """
         super().__init__(parent, bg="gray12")
         self.movie = movie
         self.selected_showtime = None
@@ -163,6 +262,12 @@ class ShowtimePopup(tk.Toplevel):
         self._build_ui()
     
     def _build_ui(self):
+        """
+        Builds and updates the popup UI.
+        If no showtimes is selected, displays available showtimes. 
+        If a showtime is selected, displays the selected showtime and 
+        next steps.
+        """
         # Clear previous widgets
         for widget in self.main_frame.winfo_children():
             widget.destroy()

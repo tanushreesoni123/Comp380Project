@@ -1,9 +1,33 @@
 import tkinter as tk
 from tkinter import messagebox
 from src.backend.services.auth_service import AuthService
+"""
+    A window to login returning customers.
+    This frame allows customers to enter and verify credentials.
+    Following verification, customers are then routed to a different
+    window.
+    Author: D. Tinoco
+"""
 
 class LoginWindow(tk.Frame):
+    """
+    The customer window for logging in. The interface allows
+    customer to enter username and password, or to select the option to register
+    an account.
+    """
+
     def __init__(self, master, db):
+        """
+        Constructs/initializes login window.
+
+
+        Parameters:
+            master: Parent Tkinter widget
+            db: database controller
+
+
+        """
+
         super().__init__(master, bg="gray12")
         self.db = db
         self.auth = AuthService(db)
@@ -11,6 +35,13 @@ class LoginWindow(tk.Frame):
         self.pack(fill="both", expand=True)
 
     def _build_ui(self):
+        """
+        Builds a customer login UI.
+        Constructs a container, creates additional labels,
+        and packs the container with buttons or input boxes
+        for respective usernames / passwords.
+        """
+
         container = tk.Frame(self, bg="gray12", padx=25, pady=25)
         container.pack(expand=True, padx=40, pady=40)
 
@@ -44,6 +75,11 @@ class LoginWindow(tk.Frame):
         register_btn.bind("<Leave>", lambda e: e.widget.config(fg="sienna1"))
 
     def _do_login(self):
+        """
+        Validates customer login credentials and leads
+        user to alternate window post authentication.
+        """
+
         email = self.username.get().strip()
         password = self.password.get().strip()
 
@@ -71,6 +107,11 @@ class LoginWindow(tk.Frame):
             ManagerWindow(self.master, self.db, user)
 
     def _open_register(self):
+        """
+        Opens a new window that leads to registration options for
+        users who are not returning customers.
+        """
+
         from .registration_window import RegistrationWindow
         master = self.master  # save before destroy
         db = self.db          # save before destroy
