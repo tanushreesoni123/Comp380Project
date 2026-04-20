@@ -18,23 +18,15 @@ from src.backend.services.auth_service import AuthService
 """
 class LoginWindow(tk.Frame):
     """
-<<<<<<< HEAD
     The customer window for logging in. The interface allows
     customer to enter username and password, or to select the option to register
     an account.
     """
 
-=======
-    The customer window for logging in. The interface allows 
-    customer to enter username and password, or to select the option to register
-    an account.
-    """
->>>>>>> 2cccef9 (added seat picker UI)
     def __init__(self, master, db):
         """
         Constructs/initializes login window.
 
-<<<<<<< HEAD
 
         Parameters:
             master: Parent Tkinter widget
@@ -43,13 +35,6 @@ class LoginWindow(tk.Frame):
 
         """
 
-=======
-        Parameters: 
-            master: Parent Tkinter widget
-            db: database controller
-
-        """
->>>>>>> 2cccef9 (added seat picker UI)
         super().__init__(master, bg="gray12")
         self.db = db
         self.auth = AuthService(db)
@@ -61,14 +46,9 @@ class LoginWindow(tk.Frame):
         Builds a customer login UI.
         Constructs a container, creates additional labels,
         and packs the container with buttons or input boxes
-<<<<<<< HEAD
         for respective usernames / passwords.
         """
 
-=======
-        for respective usernames / passwords. 
-        """
->>>>>>> 2cccef9 (added seat picker UI)
         container = tk.Frame(self, bg="gray12", padx=25, pady=25)
         container.pack(expand=True, padx=40, pady=40)
 
@@ -106,10 +86,6 @@ class LoginWindow(tk.Frame):
         Validates customer login credentials and leads
         user to alternate window post authentication.
         """
-<<<<<<< HEAD
-
-=======
->>>>>>> 2cccef9 (added seat picker UI)
         email = self.username.get().strip()
         password = self.password.get().strip()
 
@@ -141,10 +117,6 @@ class LoginWindow(tk.Frame):
         Opens a new window that leads to registration options for
         users who are not returning customers.
         """
-<<<<<<< HEAD
-
-=======
->>>>>>> 2cccef9 (added seat picker UI)
         from .registration_window import RegistrationWindow
         master = self.master  # save before destroy
         db = self.db          # save before destroy
