@@ -5,20 +5,13 @@ from datetime import datetime, timedelta
 
 from src.backend.database import DB
 
-<<<<<<< HEAD
 """
     The customer window for browsing available movies.
-=======
-
-"""
-    The customer window for browsing available movies. 
->>>>>>> 2cccef9 (added seat picker UI)
     This frame allows customers to view movie posters,
     titles, and descriptions. It also allows movie
     selection through the UI.
     Author: D. Tinoco
 
-<<<<<<< HEAD
 
 """
 
@@ -31,33 +24,17 @@ class CustomerWindow(tk.Frame):
     """
 
     
-=======
-"""
-class CustomerWindow(tk.Frame):
-    """
-    The primary customer window for browsing available movies.
-    The interface is scrollable, displays movie details, and permits 
-    movie selection.
-    """
->>>>>>> 2cccef9 (added seat picker UI)
     def __init__(self, master, db, user):
         """
         Constructs/initializes the customer window.
 
-<<<<<<< HEAD
 
         Parameters:
-=======
-        Parameters: 
->>>>>>> 2cccef9 (added seat picker UI)
             master: Parent Tkinter widget
             db: Database connector
             user: Current user
         """
-<<<<<<< HEAD
 
-=======
->>>>>>> 2cccef9 (added seat picker UI)
         super().__init__(master, bg = "gray12")
 
         self.db =db
@@ -84,7 +61,6 @@ class CustomerWindow(tk.Frame):
         """
         Builds the movie browsing UI.
 
-<<<<<<< HEAD
 
         Constructs the outer container, canvas,
         scrollbar, and the frame that can be scrolled through
@@ -93,13 +69,6 @@ class CustomerWindow(tk.Frame):
 
         """
 
-=======
-        Constructs the outer container, canvas, 
-        scrollbar, and the frame that can be scrolled through
-        to show the available movies/movie cards.
-
-        """
->>>>>>> 2cccef9 (added seat picker UI)
         self.configure(bg = "gray12")
 
         movie_list_container = tk.Frame(self, bg=  "gray13")
@@ -169,15 +138,9 @@ class CustomerWindow(tk.Frame):
     def new_scroll_frame(self,event):
         """
         Alters the scrollable frame to fit the canvas window and width size.
-<<<<<<< HEAD
         Parameters:
             event: Tkinter configuring event
 
-=======
-
-        Parameters: 
-            event: Tkinter configuring event
->>>>>>> 2cccef9 (added seat picker UI)
         """
         self.canvas.itemconfig(self.canvas_window, width = event.width)
 
@@ -186,48 +149,30 @@ class CustomerWindow(tk.Frame):
         """
         A tester method to show that the button is functioning
         """
-<<<<<<< HEAD
 
-=======
->>>>>>> 2cccef9 (added seat picker UI)
         print("selected:", movie["title"])
         ShowtimePopup(self.master, movie)
 
 #creates various cards using images/title (they're buttons that can be clicked on)
-
 class MovieCard(tk.Frame):
     """
     The UI that represents / stores individual movie cards. Each
-<<<<<<< HEAD
     movie card includes a poster, title, and description. Each is clickable
     to enable movie selection.
     Author: D. Tinoco
     """
 
-=======
-    movie card includes a poster, title, and description. Each is clickable 
-    to enable movie selection.
-    Author: D. Tinoco
-    """
->>>>>>> 2cccef9 (added seat picker UI)
     def __init__(self, parent, movie, on_click):
         """
         Initializes a movie card
 
-<<<<<<< HEAD
 
         Parameters:
-=======
-        Parameters: 
->>>>>>> 2cccef9 (added seat picker UI)
             parent: Parent Tkinter widget
             movie: dictionary containing movie info
             on_click: A function that is called when movie card is selected
         """
-<<<<<<< HEAD
 
-=======
->>>>>>> 2cccef9 (added seat picker UI)
         super().__init__(parent, bg = "gray17", padx = 10, pady = 10)
          
         self.movie = movie
@@ -254,9 +199,6 @@ class MovieCard(tk.Frame):
         self.movie_description.grid(row = 1, column = 1, sticky = "w")
 
     def handle_click(self):
-        """
-        Calls a callback for the selected movie card.
-        """
         self.on_click(self.movie)
 
     def on_enter(self, event):
