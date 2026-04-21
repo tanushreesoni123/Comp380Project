@@ -9,6 +9,13 @@ from src.backend.services.auth_service import AuthService
     Author: D. Tinoco
 """
 
+"""
+    A window to login returning customers.
+    This frame allows customers to enter and verify credentials.
+    Following verification, customers are then routed to a different
+    window.
+    Author: D. Tinoco
+"""
 class LoginWindow(tk.Frame):
     """
     The customer window for logging in. The interface allows
@@ -79,7 +86,6 @@ class LoginWindow(tk.Frame):
         Validates customer login credentials and leads
         user to alternate window post authentication.
         """
-
         email = self.username.get().strip()
         password = self.password.get().strip()
 
@@ -111,7 +117,6 @@ class LoginWindow(tk.Frame):
         Opens a new window that leads to registration options for
         users who are not returning customers.
         """
-
         from .registration_window import RegistrationWindow
         master = self.master  # save before destroy
         db = self.db          # save before destroy
