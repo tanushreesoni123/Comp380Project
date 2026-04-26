@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 from datetime import datetime, timedelta
 
+from src.backend.services.movies_service import MovieService
 from src.backend.database import DB
 
 """
@@ -40,6 +41,7 @@ class CustomerWindow(tk.Frame):
         self.db =db
         self.user = user
         self.master.eval('tk::PlaceWindow . center')
+        self.movies_service = MovieService(self.db)
         self.configure(bg = "gray12")
 
         #wanted a bigger window display
@@ -70,9 +72,16 @@ class CustomerWindow(tk.Frame):
         """
 
         self.configure(bg = "gray12")
+        self.top = tk.Frame(self, bg = "gray12")
+        self.top.pack(fill = "x", padx = (20,20))
+
+        self.available_movies = tk.Label(self.top, text = "Now Playing", bg = "gray12",
+                                    fg = "white", font = ("Helvetica", 17, "bold"))
+        self.available_movies.pack(anchor = "n", padx = 10, pady = 10)
+
 
         movie_list_container = tk.Frame(self, bg=  "gray13")
-        movie_list_container.pack(expand = True, fill = "both", padx=40, pady=40)
+        movie_list_container.pack(expand = True, fill = "both", padx=10, pady=20)
 
         self.canvas = tk.Canvas(movie_list_container, bg = "gray13")
         self.canvas.pack(side = "left", fill = "both", expand = True)
@@ -89,47 +98,30 @@ class CustomerWindow(tk.Frame):
         self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion = self.canvas.bbox("all")))
         self.canvas.bind("<Configure>", self.new_scroll_frame)
 
-        #Just inbuilt, adjustable as necessary
-        movies = [
-                {"title": "Interstellar",
-                "image": "assets/movieposters/Interstellar.png",
-                "description": ("In a future where Earth is becoming uninhabitable, a former pilot "
-                "(Matthew McConaughey) joins a mission to travel beyond our galaxy in search of a new"
-                " home for humanity. As the journey pushes the limits of time and space, the crew must"
-                " confront impossible choices and the true cost of survival.")
-                },
-                {"title": "Arrival",
-                "image": "assets/movieposters/Arrival.png",
-                "description": ("When mysterious spacecraft appear around the world, a linguist (Amy Adams)"
-                " is recruited to communicate with the unknown visitors. As she works to understand their language,"
-                " the line between past, present, and future begins to blur.")
-                },
-                {"title": "Hacksaw Ridge",
-                "image": "assets/movieposters/HacksawRidge.png", 
-                "description":("Desmond Doss (Andrew Garfield), a deeply religious young man, enlists in"
-                " the U.S. Army during World War II but refuses to carry a weapon. As he faces intense "
-                "skepticism from fellow soldiers and superiors, his beliefs are put to the ultimate test"
-                " when he’s sent into one of the war’s deadliest battles.")
-                },
-                {"title": "Across the Spiderverse",
-                "image": "assets/movieposters/AcrossTheSpiderverse.png",
-                "description": ("Miles Morales reunites with Gwen Stacy and is pulled into a vast multiverse of "
-                "Spider-People. When he encounters a powerful new threat, Miles must redefine what it means to be a hero.")
-                }, 
-                {"title" : "The Maze Runner",
-                "image": "assets/movieposters/TheMazeRunner.png",
-                "description":("A teenage boy (Dylan O’Brien) wakes up in a mysterious glade surrounded by a massive,"
-                " ever-changing maze with no memory of his past. As he adapts to life among the other boys trapped there,"
-                " he becomes determined to uncover the maze’s secrets and find a way out.")
-                },
-                {"title" : "Howl's Moving Castle",
-                "image": "assets/movieposters/HowlsMovingCastle.png",
-                "description":("A young woman named Sophie is mysteriously transformed into"
-                " an old woman and seeks refuge in the magical moving castle of the wizard Howl."
-                " As she navigates a world of war and enchantment, she discovers that nothing "
-                "is quite what it seems.")
-                }
-            ]
+        movie_rows = self.movies_service.get_all_movies()
+
+
+
+        #movie titles + poster storage
+        all_posters ={
+            "Interstellar" : "assets/movieposters/Interstellar.png",
+            "Arrival" : "assets/movieposters/Arrival.png",
+            "Hacksaw Ridge" : "assets/movieposters/HacksawRidge.png", 
+            "Across the Spiderverse" : "assets/movieposters/AcrossTheSpiderverse.png",
+            "The Maze Runner" : "assets/movieposters/TheMazeRunner.png",
+            "Howl's Moving Castle" : "assets/movieposters/HowlsMovingCastle.png"
+            }
+        
+        movies = []
+
+        for movie in movie_rows:
+            movies.append({
+                "movie_id" : movie["movie_id"], "title" : movie["title"],
+                "genre" : movie["genre"], "language" : movie["language"],
+                "duration_min" : movie["duration_min"],
+                "description" : movie["synopsis"],
+                "image" : all_posters.get(movie["title"], "assets/movieposters/default.png")
+            })
         #creates a movie card/slot in our layout for each movie
         for movie in movies:
             card = MovieCard(self.scrollable_frame, movie, on_click = self.select_movie)
@@ -150,8 +142,7 @@ class CustomerWindow(tk.Frame):
         A tester method to show that the button is functioning
         """
 
-        print("selected:", movie["title"])
-        ShowtimePopup(self.master, movie)
+        ShowtimePopup(self.master, self.db, self.user, movie)
 
 #creates various cards using images/title (they're buttons that can be clicked on)
 class MovieCard(tk.Frame):
@@ -239,21 +230,26 @@ class ShowtimePopup(tk.Toplevel):
             Rebuilds the interface depending if a showtime has been selected
             or not.
     """
-    def __init__(self, parent, movie):
+    def __init__(self, parent, db, user, movie):
         """
         Initializes the popup window and sets intial state.
         """
         super().__init__(parent, bg="gray12")
+        self.db = db
+        self.user = user
         self.movie = movie
+        self.movies_service = MovieService(self.db)
         self.selected_showtime = None
+        self.selected_show = None
+
         self.title(f"{movie['title']} - Select Showtime")
-        self.geometry("400x350")
+        self.geometry("1000x850")
         self.configure(bg="gray12")
         
         # Center the popup window
         self.update_idletasks()
-        x = (self.winfo_screenwidth() // 2) - (400 // 2)
-        y = (self.winfo_screenheight() // 2) - (350 // 2)
+        x = (self.winfo_screenwidth() // 2) - (1000 // 2)
+        y = (self.winfo_screenheight() // 2) - (850 // 2)
         self.geometry(f"+{x}+{y}")
         
         self.main_frame = tk.Frame(self, bg="gray12")
@@ -288,18 +284,30 @@ class ShowtimePopup(tk.Toplevel):
             # Generate 5 sample showtimes
             showtimes = self._generate_showtimes()
             
+            if not showtimes:
+                no_showtimes = tk.Label(self.main_frame, text = "No available showtimes", 
+                               bg = "gray12", fg = "white", font = ("Helvetica", 12, "bold"))
+                no_showtimes.pack(pady = 10)
+
+            else: 
             # Create buttons for each showtime
-            for showtime in showtimes:
-                btn = tk.Button(self.main_frame, text=showtime, 
-                               bg="gray17", fg="sienna1",
-                               font=("Helvetica", 11),
-                               width=25,
-                               command=lambda st=showtime: self._select_showtime(st))
-                btn.pack(pady=5)
+                for showtime in showtimes:
+                    dtime = datetime.strptime(showtime["show_datetime"], "%Y-%m-%d %H:%M:%S")
+                    btn_txt = (
+                        f"{dtime.strftime("%b %d, %Y - %I:%M%p ")} \n "
+                        f"{showtime['theatre_name']} ({showtime['city']}) \n "
+                        f"{showtime['screen_name']} | ${showtime['base_price']:.2f}"
+                    )
+                    btn = tk.Button(self.main_frame, text=btn_txt, 
+                                bg="gray17", fg="sienna1",
+                                font=("Helvetica", 11),
+                                width=25,
+                                command=lambda st=showtime: self._select_showtime(st))
+                    btn.pack(pady=5)
                 
                 # Hover effect
-                btn.bind("<Enter>", lambda e, b=btn: b.config(bg="sienna1", fg="gray12"))
-                btn.bind("<Leave>", lambda e, b=btn: b.config(bg="gray17", fg="sienna1"))
+                    btn.bind("<Enter>", lambda e, b=btn: b.config(bg="sienna1", fg="gray12"))
+                    btn.bind("<Leave>", lambda e, b=btn: b.config(bg="gray17", fg="sienna1"))
         else:
             # Show selected showtime and seat selection option
             selected_label = tk.Label(self.main_frame, text="Selected Showtime:", 
@@ -345,22 +353,33 @@ class ShowtimePopup(tk.Toplevel):
     
     def _generate_showtimes(self):
         """Generate 5 sample showtimes"""
-        times = ["2:00 PM", "4:30 PM", "7:00 PM", "9:30 PM", "11:00 PM"]
-        return times
+        #times = ["2:00 PM", "4:30 PM", "7:00 PM", "9:30 PM", "11:00 PM"]
+        #return times
+        #replaced hardcoded times with backend data
+        return self.movies_service.get_shows_for_movie(self.movie["movie_id"])
     
+    #connects frontend with backend (recieves showtime info/details)
     def _select_showtime(self, showtime):
         """Handle showtime selection"""
-        self.selected_showtime = showtime
+        self.selected_showing = showtime
+        dtime = datetime.strptime(showtime["show_datetime"], "%Y-%m-%d %H:%M:%S")
+        self.selected_showtime = (
+            f"{dtime.strftime("%b %d, %Y - %I:%M%p ")} | "
+            f"{showtime['theatre_name']} ({showtime['city']}) | "
+            f"{showtime['screen_name']} | ${showtime['base_price']:.2f}"
+        )
         self._build_ui()
     
     def _go_back(self):
         """Go back to showtime selection"""
         self.selected_showtime = None
+        self.selected_showtimes = None
         self._build_ui()
     
+    #takes us to next window
     def _select_seats(self):
         """Handle seat selection"""
-        messagebox.showinfo("Seats", 
-                          f"Proceeding to seat selection for {self.movie['title']} at {self.selected_showtime}")
+        from .seat_picker import SeatPicker
         self.destroy()
+        SeatPicker(self.master, self.db, self.user, self.movie, self.selected_showing)
     
