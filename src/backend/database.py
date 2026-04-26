@@ -82,26 +82,35 @@ class DB:
     
     def __init__(self, path: str):
         self.path = path
-        self.conn = sqlite3.connect(self.path)
+        self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.execute("PRAGMA foreign_keys = ON")
         self.conn.row_factory = sqlite3.Row
 
     def exec(self, sql: str, params=()):
-        cur = self.conn.cursor()
-        cur.execute(sql, params)
-        self.conn.commit()
-        return cur
+        try:
+            cur = self.conn.cursor()
+            cur.execute(sql, params)
+            self.conn.commit()
+            return cur
+        except Exception as e:
+            print("DB EXEC ERROR:", e)
+            raise
 
     def query(self, sql: str, params=()):
-        cur = self.conn.cursor()
-        cur.execute(sql, params)
-        return cur.fetchall()
+        try:
+            cur = self.conn.cursor()
+            cur.execute(sql, params)
+            return cur.fetchall()
+        except Exception as e:
+            print("DB QUERY ERROR:", e)
+            raise
 
     def close(self):
         self.conn.close()
 
 
 def init_db(db: DB):
+    # ── USERS ───────────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS users (
         user_id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,6 +122,7 @@ def init_db(db: DB):
     )
     """)
 
+    # ── MOVIES────────────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS movies (
         movie_id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,10 +130,12 @@ def init_db(db: DB):
         genre        TEXT,
         language     TEXT,
         duration_min INTEGER,
-        synopsis     TEXT
+        synopsis     TEXT,
+        poster_path  TEXT
     )
     """)
 
+    # ── THEATRES ─────────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS theatres (
         theatre_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,6 +145,7 @@ def init_db(db: DB):
     )
     """)
 
+    # ── SCREENS ──────────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS screens (
         screen_id  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,6 +157,7 @@ def init_db(db: DB):
     )
     """)
 
+    # ── SHOWS ────────────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS shows (
         show_id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -156,6 +170,7 @@ def init_db(db: DB):
     )
     """)
 
+    # ── BOOKINGS ─────────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS bookings (
         booking_id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -170,6 +185,7 @@ def init_db(db: DB):
     )
     """)
 
+    # ── BOOKING SEATS ────────────────────────────────────
     db.exec("""
     CREATE TABLE IF NOT EXISTS booking_seats (
         booking_seat_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -181,6 +197,7 @@ def init_db(db: DB):
     )
     """)
 
+    # ── CART ─────────────────────────────────────────────
     db.exec("""
         CREATE TABLE IF NOT EXISTS cart (
             cart_id    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -193,7 +210,13 @@ def init_db(db: DB):
             FOREIGN KEY(show_id) REFERENCES shows(show_id) ON DELETE CASCADE
         )
     """)
-    # always call seed after tables exist
+
+    # ── INDEXES (performance boost) ──────────────────────
+    db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+    db.exec("CREATE INDEX IF NOT EXISTS idx_shows_movie ON shows(movie_id)")
+    db.exec("CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id)")
+
+    # Seed data
     seed_if_empty(db)
 
 def seed_if_empty(db: DB):
@@ -214,41 +237,47 @@ def seed_if_empty(db: DB):
              "In a future where Earth is becoming uninhabitable, a former pilot "
              "joins a mission to travel beyond our galaxy in search of a new home "
              "for humanity. As the journey pushes the limits of time and space, "
-             "the crew must confront impossible choices and the true cost of survival."),
+             "the crew must confront impossible choices and the true cost of survival.",
+             "assets/movieposters/Interstellar.png"),
 
             ("Arrival",               "Sci-Fi",       "English",  116,
              "When mysterious spacecraft appear around the world, a linguist is "
              "recruited to communicate with the unknown visitors. As she works to "
              "understand their language, the line between past, present, and future "
-             "begins to blur."),
+             "begins to blur.",
+             "assets/movieposters/Arrival.png"),
 
             ("Hacksaw Ridge",         "War/Drama",    "English",  139,
              "Desmond Doss, a deeply religious young man, enlists in the U.S. Army "
              "during World War II but refuses to carry a weapon. His beliefs are put "
-             "to the ultimate test when he is sent into one of the war's deadliest battles."),
+             "to the ultimate test when he is sent into one of the war's deadliest battles.",
+             "assets/movieposters/HacksawRidge.png"),
 
             ("Across the Spiderverse","Animation",    "English",  140,
              "Miles Morales reunites with Gwen Stacy and is pulled into a vast "
              "multiverse of Spider-People. When he encounters a powerful new threat, "
-             "Miles must redefine what it means to be a hero."),
+             "Miles must redefine what it means to be a hero.",
+             "assets/movieposters/AccrossTheSpiderverse.png"),
 
             ("The Maze Runner",       "Action",       "English",  113,
              "A teenage boy wakes up in a mysterious glade surrounded by a massive "
              "ever-changing maze with no memory of his past. He becomes determined "
-             "to uncover the maze's secrets and find a way out."),
+             "to uncover the maze's secrets and find a way out.",
+             "assets/movieposters/TheMazeRunner.png"),
 
             ("Howl's Moving Castle",  "Animation",    "Japanese", 119,
              "A young woman named Sophie is transformed into an old woman and seeks "
              "refuge in the magical moving castle of the wizard Howl. As she navigates "
              "a world of war and enchantment, she discovers that nothing is quite "
-             "what it seems."),
+             "what it seems.",
+             "assets/movieposters/HowlsMovingCastle.png"),
         ]
 
-        for title, genre, language, duration, synopsis in movies:
+        for m in movies:
             db.exec(
-                "INSERT INTO movies(title,genre,language,duration_min,synopsis)"
-                " VALUES(?,?,?,?,?)",
-                (title, genre, language, duration, synopsis)
+                "INSERT INTO movies(title,genre,language,duration_min,synopsis,poster_path)"
+                " VALUES(?,?,?,?,?,?)",
+                m
             )
 
     # ── Theatres ─────────────────────────────────────────
@@ -286,18 +315,15 @@ def seed_if_empty(db: DB):
         base_times = [
             datetime.now() + timedelta(hours=2),
             datetime.now() + timedelta(hours=5),
-            datetime.now() + timedelta(days=1, hours=3),
-            datetime.now() + timedelta(days=1, hours=7),
         ]
-        prices = [12.0, 14.0, 11.0, 13.0]
 
         for movie in movies:
-            for screen in screens[:2]:
-                for showtime, price in zip(base_times[:2], prices[:2]):
+            for screen in screens:
+                for showtime in base_times:
                     db.exec(
                         "INSERT INTO shows(movie_id,screen_id,"
                         "show_datetime,base_price) VALUES(?,?,?,?)",
                         (movie["movie_id"], screen["screen_id"],
-                         showtime.strftime("%Y-%m-%d %H:%M:%S"), price)
+                         showtime.strftime("%Y-%m-%d %H:%M:%S"), 12.0)
                     )
                     
