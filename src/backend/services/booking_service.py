@@ -87,21 +87,10 @@ class BookingService:
     def create_booking(self, user_id: int, show_id: int, seat_labels: list[str]):
         if not seat_labels:
             raise ValueError("Please select at least one seat.")
-    """
-    Creates a new booking for selected seats.
 
-    Args:
-        user_id (int): ID of the user
-        show_id (int): ID of the show
-        seat_labels (list): List of selected seat labels
-
-    Returns:
-        dict: Booking confirmation including booking ID and total amount
-
-    Raises:
-        ValueError: If seats are invalid or already booked
-    """
-
+        normalized = []
+        for seat in seat_labels:
+            seat = seat.strip().upper()
             if seat and seat not in normalized:
                 normalized.append(seat)
 
@@ -157,3 +146,20 @@ class BookingService:
         except Exception:
             self.db.conn.rollback()
             raise
+        def create_booking(self, user_id, show_id, seat_labels):
+    
+    
+           """
+    Creates a new booking for selected seats.
+
+    Args:
+        user_id (int): ID of the user
+        show_id (int): ID of the show
+        seat_labels (list): List of selected seat labels
+
+    Returns:
+        dict: Booking confirmation including booking ID and total amount
+
+    Raises:
+        ValueError: If seats are invalid or already booked
+    """
