@@ -1,0 +1,39 @@
+[33m1b9e70b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Add backend payment service with booking + payment flow and payments table
+[33m7042462[m update documentation
+[33mc9fe2b8[m remove pycache files
+[33m605a504[m clean up project structure
+[33md891a11[m update database tables
+[33m6c8a4d0[m add documentation to auth_service
+[33m14ef11b[m Merge pull request #1 from tanushreesoni123/seat-picker-ui-adjustments
+[33mb1682d5[m Fixed merge conflict markers/restored to group's version
+[33m46d5c1e[m added seat picker UI
+[33mf97b56d[m backend documentation completed: movie_service, auth_service, and database
+[33m772e76b[m Merge branch 'main' of https://github.com/tanushreesoni123/Comp380Project
+[33m3425c0a[m documentation for customer_window, login_window, and registration_window
+[33m73bfc37[m Add proper docstrings for Phase 3 documentation
+[33m0e8e79c[m Add seat picker UI and booking integration
+[33mcc56593[m Add seat booking backend logic
+[33m0e83b9d[m Added available showtimes
+[33m6900e09[m add more tables to database
+[33m8d42e92[m Merge branch 'main' of github.com:tanushreesoni123/Comp380Project
+[33mbda414a[m create more tables in database
+[33m02cfcab[m Applied gitignore to ignore cache/db files
+[33ma3d87af[m Added customer window
+[33mdb7f3a2[m create files for frontend layout
+[33mdbb6c00[m create payment service file
+[33ma9a962f[m removed old movie_list file after moving code to customer_window
+[33m2e12b60[m resolved merge conflicts, accepted new structure
+[33m2675f17[m movie list UI with scroll bar, descriptions, and posters
+[33md5f4a92[m clean up project structure
+[33m752d375[m clean up project structure
+[33m8452f9b[m Create frontend folder for clean UI structure
+[33m339cbd2[m fix: replace  movies_service with proper DB-connected MovieService
+[33mb7baf97[m available movies working code
+[33mc6df7f6[m Created registration window with basic layout and placeholder behavior for the "Create Account" button.
+[33m29b4193[m Add README with dependencies installation and run commands
+[33mb75a85b[m Add main.py as entry point to initialize DB and launch app
+[33m31481cd[m Connect frontend login screen to backend
+[33m100de03[m Add backend structure
+[33m92b9ef5[m Add login UI (frontend skeleton)
+[33m4be3391[m main.py
+[33m7ba9fdd[m Initial commit with README
