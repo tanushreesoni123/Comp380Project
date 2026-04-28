@@ -1,85 +1,17 @@
+"""
+Module: database.py
+Author: Shivranjini Pandey 
+Date: 2026-04-12
+
+Description:
+This module manages the database connection and operations for the cinema system.
+It is responsible for creating tables, initializing data, and executing queries.
+"""
 import sqlite3
 from datetime import datetime, timedelta
 from src.utils import sha256, now_iso
-"""
-a) Module/Class Name:
-   Database Module (DB Class and Initialization Functions)
 
-b) Date: April 12, 2026
-
-c) Programmer: Shivranjini Pandey
-
-d) Description:
-   This module manages all database-related operations for the application.
-   It establishes a connection to the SQLite database, executes SQL queries,
-   and initializes the database schema. It also seeds the database with initial
-   data such as users, movies, theatres, screens, and showtimes.
-
-e) Important Functions:
-
-   1. DB.__init__(path: str)
-      - Input:
-        • path (str): File path to the SQLite database
-      - Output:
-        • Initializes database connection
-      - Description:
-        Creates a connection to the SQLite database, enables foreign key constraints,
-        and sets row format to sqlite3.Row for easy column access.
-
-   2. DB.exec(sql: str, params=())
-      - Input:
-        • sql (str): SQL command (INSERT, UPDATE, CREATE, etc.)
-        • params (tuple): Parameters for SQL query
-      - Output:
-        • Cursor object
-      - Description:
-        Executes SQL commands that modify the database and commits changes.
-
-   3. DB.query(sql: str, params=())
-      - Input:
-        • sql (str): SQL SELECT query
-        • params (tuple): Parameters for SQL query
-      - Output:
-        • List of sqlite3.Row objects
-      - Description:
-        Executes SELECT queries and returns results.
-
-   4. DB.close()
-      - Input: None
-      - Output: None
-      - Description:
-        Closes the database connection.
-
-   5. init_db(db: DB)
-      - Input:
-        • db (DB): Database instance
-      - Output: None
-      - Description:
-        Creates all required tables (users, movies, theatres, screens, shows,
-        bookings, booking_seats, cart) if they do not exist, and calls seed_if_empty.
-
-   6. seed_if_empty(db: DB)
-      - Input:
-        • db (DB): Database instance
-      - Output: None
-      - Description:
-        Inserts initial data into the database (manager account, movies, theatres,
-        screens, and showtimes) only if the tables are empty.
-
-f) Important Data Structures:
-   - SQLite database tables (users, movies, theatres, screens, shows, bookings, booking_seats, cart).
-   - sqlite3.Row objects for structured access to query results.
-   - Lists and tuples for batch data insertion (e.g., movies list).
-
-g) Algorithm/Design Choices:
-   - Relational database design with foreign keys ensures data integrity and consistency.
-   - Use of AUTOINCREMENT primary keys for unique identification of records.
-   - Conditional seeding (checking if data exists before inserting) avoids duplication.
-   - Nested loops for generating showtimes allow scalable creation of multiple shows per movie and screen.
-   - SQLite is chosen for simplicity, lightweight usage, and ease of integration for small-scale applications.
-"""
 class DB:
-    
     def __init__(self, path: str):
         self.path = path
         self.conn = sqlite3.connect(self.path)
@@ -193,6 +125,20 @@ def init_db(db: DB):
             FOREIGN KEY(show_id) REFERENCES shows(show_id) ON DELETE CASCADE
         )
     """)
+
+    db.exec("""
+    CREATE TABLE IF NOT EXISTS payments (
+        payment_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        booking_id      INTEGER NOT NULL UNIQUE,
+        amount          REAL NOT NULL,
+        payment_method  TEXT NOT NULL CHECK(payment_method IN ('CARD','CASH','UPI')),
+        card_last4      TEXT,
+        transaction_ref TEXT NOT NULL UNIQUE,
+        status          TEXT NOT NULL CHECK(status IN ('SUCCESS','FAILED','REFUNDED')),
+        paid_at         TEXT NOT NULL,
+        FOREIGN KEY(booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
+    )
+""")
     # always call seed after tables exist
     seed_if_empty(db)
 
