@@ -80,7 +80,10 @@ class BookingService:
         if not seat_labels:
             raise ValueError("Please select at least one seat.")
 
+<<<<<<< HEAD
+=======
         # Normalize seat labels
+>>>>>>> 036932c879b6b8fd0084910c726098ed185cfaa8
         normalized = []
         for seat in seat_labels:
             seat = seat.strip().upper()
@@ -143,6 +146,25 @@ class BookingService:
         except Exception:
             self.db.conn.rollback()
             raise
+<<<<<<< HEAD
+        def create_booking(self, user_id, show_id, seat_labels):
+    
+    
+           """
+    Creates a new booking for selected seats.
+
+    Args:
+        user_id (int): ID of the user
+        show_id (int): ID of the show
+        seat_labels (list): List of selected seat labels
+
+    Returns:
+        dict: Booking confirmation including booking ID and total amount
+
+    Raises:
+        ValueError: If seats are invalid or already booked
+    """
+=======
 
     # ───────────────────────── BOOKING DETAILS ─────────────────────────
 
