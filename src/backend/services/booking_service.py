@@ -143,23 +143,7 @@ class BookingService:
             self.db.conn.rollback()
             raise
 
-    def create_booking(self, user_id, show_id, seat_labels):
-    
-    
-           """
-    Creates a new booking for selected seats.
 
-    Args:
-        user_id (int): ID of the user
-        show_id (int): ID of the show
-        seat_labels (list): List of selected seat labels
-
-    Returns:
-        dict: Booking confirmation including booking ID and total amount
-
-    Raises:
-        ValueError: If seats are invalid or already booked
-    """
 
 
     # ───────────────────────── BOOKING DETAILS ─────────────────────────

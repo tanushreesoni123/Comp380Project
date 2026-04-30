@@ -1,7 +1,18 @@
+#commented out all code prior to backend connection
+#UI is functional, I had hardcoded everything, but was unable
+#to connect to backend, so I commented out the code
+#so that everyone could see my logic 
+
+"""
 import tkinter as tk
 
 
 from datetime import datetime
+from src.backend.services.booking_service import BookingService
+
+#commented all lines of code with variables like movie/
+#theatre_name, screen_name, city, etc. 
+#need to use finalized backend to implement frontend properly
 
 
 class BookingCard(tk.Frame):
@@ -66,9 +77,8 @@ class BookingTab(tk.Frame):
         self.on_return = on_return
 
 
-
         self.parent.eval('tk::PlaceWindow . center')
-        #self.booking_service = BookingService(self.db)
+        self.booking_service = BookingService(self.db)
 
 
         window_width = 1000
@@ -87,107 +97,11 @@ class BookingTab(tk.Frame):
         self.pack(fill = "both", expand = True)
 
 
-        #just some hardcoded bookings for testing purposes
-        self.booking_rows = [
-            {
-                "booking_id": 10484,
-                "title":"Interstellar",
-                "show_datetime": "2026-04-26 19:45:00",
-                "theatre_name": "Downtown Cinema",
-                "screen_name" : "Screen 1",
-                "city":"Los Angeles",
-                "seat_labels": ["C2", "C3"],
-                "total_amount": 28.00,
-                "status": "CONFIRMED",
-                "booking_time": "2026-04-25 19:45:00",
-                "cancel_time": None,
-                "base_price" : 14.00,
-                "user_id" : 501,
-                "show_id": 409
-
-
-            },
-            {
-                "booking_id": 10489,
-                "title":"Interstellar",
-                "show_datetime": "2026-04-27 19:45:00",
-                "theatre_name": "Downtown Cinema",
-                "screen_name" : "Screen 1",
-                "city":"Los Angeles",
-                "seat_labels": ["D2", "D3"],
-                "total_amount": 28.00,
-                "status": "CONFIRMED",
-                "booking_time": "2026-04-25 19:45:00",
-                "cancel_time": None,
-                "base_price" : 14.00,
-                "user_id" : 501,
-                "show_id": 408
-
-
-            },
-            {
-                "booking_id": 10490,
-                "title":"Interstellar",
-                "show_datetime": "2026-04-30 19:45:00",
-                "theatre_name": "Downtown Cinema",
-                "screen_name" : "Screen 1",
-                "city":"Los Angeles",
-                "seat_labels": ["A2", "A3"],
-                "total_amount": 28.00,
-                "status": "CONFIRMED",
-                "booking_time": "2026-04-25 19:45:00",
-                "cancel_time": None,
-                "base_price" : 14.00,
-                "user_id" : 501,
-                "show_id": 407
-
-
-            }, 
-            {
-                "booking_id": 10490,
-                "title":"Interstellar",
-                "show_datetime": "2026-04-30 19:45:00",
-                "theatre_name": "Downtown Cinema",
-                "screen_name" : "Screen 1",
-                "city":"Los Angeles",
-                "seat_labels": ["C2", "C3"],
-                "total_amount": 28.00,
-                "status": "CONFIRMED",
-                "booking_time": "2026-04-25 19:45:00",
-                "cancel_time": None,
-                "base_price" : 14.00,
-                "user_id" : 501,
-                "show_id": 407
-
-
-            }, 
-            {
-                "booking_id": 10490,
-                "title":"Interstellar",
-                "show_datetime": "2026-04-30 19:45:00",
-                "theatre_name": "Downtown Cinema",
-                "screen_name" : "Screen 1",
-                "city":"Los Angeles",
-                "seat_labels": ["D2", "D3"],
-                "total_amount": 28.00,
-                "status": "CONFIRMED",
-                "booking_time": "2026-04-25 19:45:00",
-                "cancel_time": None,
-                "base_price" : 14.00,
-                "user_id" : 501,
-                "show_id": 407
-
-
-            }
-        ]
-
-
         self.build_ui()
 
 
     def build_ui(self):
         self.configure(bg = "gray20")
-
 
         #makes the top of the booking tab (for the title)
         self.top = tk.Frame(self, bg = "gray20")
@@ -203,7 +117,7 @@ class BookingTab(tk.Frame):
         booking_list_container = tk.Frame(self, bg=  "gray20")
         booking_list_container.pack(expand = True, fill = "both", padx=40, pady=20)
 
-        self.canvas = tk.Canvas(booking_list_container, bg = "gray20")
+        self.canvas = tk.Canvas(booking_list_container, bg = "gray20", highlightthickness = 0, bd = 0)
         self.canvas.pack(side = "left", fill = "both", expand = True)
 
         scrollbar = tk.Scrollbar(booking_list_container, orient = "vertical",
@@ -223,8 +137,6 @@ class BookingTab(tk.Frame):
         self.canvas.bind("<Configure>", self.new_scroll_frame)
 
 
-        #booking_rows = self.booking_service.get_show_details()
-
         #makes a smaller frame for buttons 
         self.bottom = tk.Frame(self, bg = "gray20")
         self.bottom.pack(fill = "x", padx = 40, pady = 5, side = "bottom")
@@ -237,13 +149,33 @@ class BookingTab(tk.Frame):
 
         self.return_button.pack(side = "right", padx = 20, pady=10)
 
+        self.canvas.bind("<Enter>", self.bind_to_mousewheel)
+        self.canvas.bind("<Leave>", self.unbind_to_mousewheel)
+
 
         bookings = []
+        booking_rows = self.booking_service.get_user_bookings(self.user["user_id"])
+
+        for booking in booking_rows:
+            extra_info = self.booking_service.get_booking_details(booking["booking_id"])
+
+            bookings.append({
+                "booking_id": booking["booking_id"],
+                "user_id" : booking["user_id"],
+                "show_id" : booking["show_id"], 
+                "booking_time": booking["booking_time"], 
+                "total_amount" : booking["total_amount"],
+                "status" : booking["status"],
+                "cancel_time" : booking["cancel_time"],
+                "title" : extra_info["movie_title"],
+                "show_datetime" : extra_info["show_datetime"],
+                "seat_labels" : extra_info["seats"]
+            })
     
     
         #loops through our bookings to make an individual card/booking for each
 
-        for booking in self.booking_rows:
+        for booking in bookings:
             card = BookingCard(self.scrollable_frame, booking, self.select_booking)
             card.pack(fill = "x", padx = (10,20), pady = 10)
 
@@ -255,7 +187,7 @@ class BookingTab(tk.Frame):
 
 
     def new_scroll_frame(self, event):
-        self.canvas.itemconfig(self.canvas_window, width = event.width)
+        self.canvas.itemconfig(self.canvas_window, width = event.width-12)
 
     #takes you to the popup receipt 
     def select_booking(self, booking):
@@ -266,7 +198,16 @@ class BookingTab(tk.Frame):
         if self.on_return:
             self.destroy()
             from .customer.customer_window import CustomerWindow
-            CustomerWindow(self, self.master, self.db, self.user)
+            CustomerWindow(self.master, self.db, self.user)
+
+    def on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    def bind_to_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self.on_mousewheel)
+
+    def unbind_to_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
 
 
 
@@ -358,6 +299,7 @@ class TicketPopup(tk.Toplevel):
 
         #allows you to cancel bookings only if you cancel before showtime 
         #and if you haven't already canceled your booking
+        
         if datetime.now() < dtime and self.booking["status"] == "CONFIRMED":
 
 
@@ -376,6 +318,8 @@ class TicketPopup(tk.Toplevel):
                 font =("Helvetica", 12), highlightbackground = "gray25", height = 3, width = 12, command = self.return_to_booking)
 
             self.return_to_bookings_button.pack(anchor = "center", padx = 20, pady=10)
+
+
 
     #takes you back to booking history
     def return_to_booking(self):

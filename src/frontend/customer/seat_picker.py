@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 #from src.backend.database import DB
+from src.backend.services.booking_service import BookingService
 
 
 class MovieSeat:
@@ -29,6 +30,8 @@ class SeatPicker(tk.Toplevel):
         self.show = show
         self.seats = {}
         self.selected_seat_list = []
+        self.booking_service = BookingService(self.db)
+        self.taken_seats = self.booking_service.get_taken_seats(self.show["show_id"])
 
         window_width = 1000
         window_height = 800
@@ -131,6 +134,9 @@ class SeatPicker(tk.Toplevel):
     def clicked_seat(self, seat_id):
         seat = self.seats[seat_id]
 
+        if seat.availability == "taken":
+            return
+
         #allows you to select seats
         if seat.availability == "available":
             seat.availability = "selected"
@@ -159,13 +165,22 @@ class SeatPicker(tk.Toplevel):
                 seat_id = f"{row}{seat_num}"
                 seat = MovieSeat(seat_id, row, seat_num)
 
+                seat_taken = seat_id in self.taken_seats
+
                 #a button for each seat, enumerates a list to identify seat
                 seat_button = tk.Button(self.seats_center, text = seat_id, bg = "gray20",
                         fg = "white", height = 3, width = 6,
                         command = lambda e = seat_id: self.clicked_seat(e))
-                seat_button.grid(row = row_index, column = center + (seat_num -1), padx = 4.2, pady = 3)
 
+                if seat_taken:
+                    seat.availability = "taken"
+                    seat_button.config(bg = "firebrick4", fg = "white", state = "disabled")
 
+                else: 
+                    seat_button.config(bg = "gray20", fg = "white",  height = 3, width = 6,
+                        command = lambda e = seat_id: self.clicked_seat(e))
+
+                seat_button.grid(row = row_index, column = center + (seat_num -1), padx = 4, pady = 3)
                 seat.button = seat_button
                 self.seats[seat_id] = seat
 
@@ -186,7 +201,7 @@ class SeatPicker(tk.Toplevel):
 
 
     def return_to_showtime(self):
-        
-        print("Back")
+        self.master.deiconify()
+        self.destroy()
 
 

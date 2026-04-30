@@ -73,7 +73,7 @@ class CustomerWindow(tk.Frame):
 
         self.configure(bg = "gray12")
         self.top = tk.Frame(self, bg = "gray12")
-        self.top.pack(fill = "x", padx = (20,20))
+        self.top.pack(fill = "x", padx = 20)
 
         self.available_movies = tk.Label(self.top, text = "Now Playing", bg = "gray12",
                                     fg = "white", font = ("Helvetica", 17, "bold"))
@@ -83,7 +83,7 @@ class CustomerWindow(tk.Frame):
         movie_list_container = tk.Frame(self, bg=  "gray13")
         movie_list_container.pack(expand = True, fill = "both", padx=10, pady=20)
 
-        self.canvas = tk.Canvas(movie_list_container, bg = "gray13")
+        self.canvas = tk.Canvas(movie_list_container, bg = "gray13", highlightthickness = 0, bd = 0)
         self.canvas.pack(side = "left", fill = "both", expand = True)
 
         scrollbar = tk.Scrollbar(movie_list_container, orient = "vertical",
@@ -99,6 +99,9 @@ class CustomerWindow(tk.Frame):
         self.canvas.bind("<Configure>", self.new_scroll_frame)
 
         movie_rows = self.movies_service.get_all_movies()
+
+        self.canvas.bind("<Enter>", self.bind_to_mousewheel)
+        self.canvas.bind("<Leave>", self.unbind_to_mousewheel)
 
 
 
@@ -122,6 +125,7 @@ class CustomerWindow(tk.Frame):
                 "description" : movie["synopsis"],
                 "image" : all_posters.get(movie["title"], "assets/movieposters/default.png")
             })
+
         #creates a movie card/slot in our layout for each movie
         for movie in movies:
             card = MovieCard(self.scrollable_frame, movie, on_click = self.select_movie)
@@ -134,7 +138,8 @@ class CustomerWindow(tk.Frame):
             event: Tkinter configuring event
 
         """
-        self.canvas.itemconfig(self.canvas_window, width = event.width)
+        self.canvas.itemconfig(self.canvas_window, width = event.width-12)
+
 
     #to ensure our button/movie can be selected
     def select_movie(self, movie):
@@ -143,6 +148,15 @@ class CustomerWindow(tk.Frame):
         """
 
         ShowtimePopup(self.master, self.db, self.user, movie)
+
+    def on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "pages")
+
+    def bind_to_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self.on_mousewheel)
+
+    def unbind_to_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
 
 #creates various cards using images/title (they're buttons that can be clicked on)
 class MovieCard(tk.Frame):
@@ -169,7 +183,7 @@ class MovieCard(tk.Frame):
         self.movie = movie
         self.on_click = on_click
         im = Image.open(movie["image"])
-        im = im.resize((100, 140))
+        im = im.resize((120, 150) )
         self.photo = ImageTk.PhotoImage(im)
 
         self.image_button = tk.Button(self, image = self.photo,
@@ -240,7 +254,7 @@ class ShowtimePopup(tk.Toplevel):
         self.movie = movie
         self.movies_service = MovieService(self.db)
         self.selected_showtime = None
-        self.selected_show = None
+        self.selected_showing = None
 
         self.title(f"{movie['title']} - Select Showtime")
         self.geometry("1000x850")
@@ -373,13 +387,13 @@ class ShowtimePopup(tk.Toplevel):
     def _go_back(self):
         """Go back to showtime selection"""
         self.selected_showtime = None
-        self.selected_showtimes = None
+        self.selected_showing = None
         self._build_ui()
     
     #takes us to next window
     def _select_seats(self):
         """Handle seat selection"""
         from .seat_picker import SeatPicker
-        self.destroy()
-        SeatPicker(self.master, self.db, self.user, self.movie, self.selected_showing)
+        self.withdraw()
+        SeatPicker(self, self.db, self.user, self.movie, self.selected_showing)
     
