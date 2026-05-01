@@ -81,6 +81,11 @@ class LoginWindow(tk.Frame):
         register_btn.bind("<Enter>", lambda e: e.widget.config(fg="lightsalmon"))
         register_btn.bind("<Leave>", lambda e: e.widget.config(fg="sienna1"))
 
+
+        #adding a button for manager login
+        tk.Button(self, text = "Manager Login", bg = "gray12", fg = "white",
+                  command = self._manager_login).pack(pady = 10)
+        
     def _do_login(self):
         """
         Validates customer login credentials and leads
@@ -109,11 +114,10 @@ class LoginWindow(tk.Frame):
             from .customer.customer_window import CustomerWindow
             master.current_user = user  # Store current user
             master.switch_frame(CustomerWindow, db, user)
-            self.destroy()
         else:
-            from .manager.manager_window import ManagerWindow
-            master.current_user = user  # Store current user
-            ManagerWindow(master, db, user)
+            from src.frontend.manager.manager_window import ManagerReportWindow
+            master.current_user = user
+            master.switch_frame(ManagerReportWindow, db)
 
     def _open_register(self):
         """
@@ -125,3 +129,12 @@ class LoginWindow(tk.Frame):
         db = self.db          # save before destroy
         self.destroy()
         RegistrationWindow(self.master, self.db)
+
+    #manager login method
+    def _manager_login(self):
+        print("Manager button clicked")  # DEBUG
+
+        from src.frontend.manager.manager_window import ManagerReportWindow
+
+        self.master.switch_frame(ManagerReportWindow, self.db)
+        

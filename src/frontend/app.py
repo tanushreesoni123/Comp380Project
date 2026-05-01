@@ -30,10 +30,12 @@ class App(tk.Tk):
         self.current_frame = None
 
         # Start with login
-        LoginWindow(self, self.db)
+        self.switch_frame(LoginWindow, self.db)
 
     # added this to switch between frames
     def switch_frame(self, frame_class, *args):
+        print("Switching to:", frame_class)
+
         if self.current_frame is not None:
             self.current_frame.destroy()
 
