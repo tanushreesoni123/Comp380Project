@@ -10,6 +10,7 @@ Handles backend booking logic including:
 - generating seat layouts
 - creating bookings
 - retrieving booking details
+- canceling bookings
 """
 
 from src.backend.database import DB
@@ -41,13 +42,14 @@ class BookingService:
     # ───────────────────────── SEAT LOGIC ─────────────────────────
 
     def get_taken_seats(self, show_id: int):
-        """Return list of already booked seat labels"""
+        """Return list of already booked seat labels (ONLY confirmed bookings)"""
         rows = self.db.query(
             """
             SELECT bs.seat_label
             FROM booking_seats bs
             JOIN bookings b ON bs.booking_id = b.booking_id
             WHERE b.show_id = ?
+              AND b.status = 'CONFIRMED'
             """,
             (show_id,)
         )
@@ -80,6 +82,7 @@ class BookingService:
         if not seat_labels:
             raise ValueError("Please select at least one seat.")
 
+        # Normalize seat labels
         normalized = []
         for seat in seat_labels:
             seat = seat.strip().upper()
@@ -143,25 +146,6 @@ class BookingService:
             self.db.conn.rollback()
             raise
 
-    def create_booking(self, user_id, show_id, seat_labels):
-    
-    
-           """
-    Creates a new booking for selected seats.
-
-    Args:
-        user_id (int): ID of the user
-        show_id (int): ID of the show
-        seat_labels (list): List of selected seat labels
-
-    Returns:
-        dict: Booking confirmation including booking ID and total amount
-
-    Raises:
-        ValueError: If seats are invalid or already booked
-    """
-
-
     # ───────────────────────── BOOKING DETAILS ─────────────────────────
 
     def get_booking_details(self, booking_id: int):
@@ -172,11 +156,16 @@ class BookingService:
             SELECT b.booking_id,
                    b.total_amount,
                    b.booking_time,
+                   b.status,
                    m.title AS movie_title,
                    sh.show_datetime
-            FROM bookings b
+                   th.name AS theatre_name,
+                   th.city,
+                   sc.name AS screen_name 
             JOIN shows sh ON b.show_id = sh.show_id
             JOIN movies m ON sh.movie_id = m.movie_id
+            JOIN screens sc ON sh.screen_id = sc.screen_id
+            JOIN theatres th ON sc.theatre_id = th.theatre_id
             WHERE b.booking_id = ?
             """,
             (booking_id,)
@@ -202,20 +191,55 @@ class BookingService:
             "booking_id": booking["booking_id"],
             "movie_title": booking["movie_title"],
             "show_datetime": booking["show_datetime"],
+            "theatre_name": booking["theatre_name"],
+            "city": booking["city"],
+            "screen_name": booking["screen_name"],
             "seats": seats,
             "total_amount": booking["total_amount"],
-        }
+            "status": booking["status"],
+}
 
-    # ───────────────────────── USER BOOKINGS (OPTIONAL) ─────────────────────────
+    # ───────────────────────── USER BOOKINGS ─────────────────────────
 
     def get_user_bookings(self, user_id: int):
-        """Fetch all bookings for a user"""
+        """Fetch all bookings for a user with movie + time info"""
+
         return self.db.query(
             """
-            SELECT booking_id, show_id, total_amount, booking_time, status
-            FROM bookings
-            WHERE user_id = ?
-            ORDER BY booking_time DESC
+            SELECT b.booking_id,
+                b.total_amount,
+                b.booking_time,
+                b.status,
+                m.title AS movie_title,
+                sh.show_datetime,
+                th.name AS theatre_name,
+                th.city,
+                sc.name AS screen_name
+            FROM bookings b
+            JOIN shows sh ON b.show_id = sh.show_id
+            JOIN movies m ON sh.movie_id = m.movie_id
+            JOIN screens sc ON sh.screen_id = sc.screen_id
+            JOIN theatres th ON sc.theatre_id = th.theatre_id
+            WHERE b.user_id = ?
+            ORDER BY b.booking_time DESC
             """,
             (user_id,)
+)
+
+    # ───────────────────────── CANCEL BOOKING ─────────────────────────
+
+    def cancel_booking(self, booking_id: int):
+        """Cancel a booking"""
+
+        cur = self.db.conn.cursor()
+        cur.execute(
+            """
+            UPDATE bookings
+            SET status = 'CANCELED',
+                cancel_time = ?
+            WHERE booking_id = ?
+            """,
+            (now_iso(), booking_id)
         )
+
+        self.db.conn.commit()
