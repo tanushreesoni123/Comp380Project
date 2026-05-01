@@ -7,6 +7,7 @@ class App(tk.Tk):
     def __init__(self, db: DB):
         super().__init__()
         self.db = db
+        self.current_user = None  # Track current logged-in user
 
         self.title("A.D.S.T Movie Booking")
         self.configure(bg="gray12")
@@ -25,5 +26,16 @@ class App(tk.Tk):
         style = ttk.Style(self)
         style.theme_use("classic")
 
-        # hand off to login screen immediately
+        # NEW: track current screen
+        self.current_frame = None
+
+        # Start with login
         LoginWindow(self, self.db)
+
+    # added this to switch between frames
+    def switch_frame(self, frame_class, *args):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = frame_class(self, *args)
+        self.current_frame.pack(fill="both", expand=True)

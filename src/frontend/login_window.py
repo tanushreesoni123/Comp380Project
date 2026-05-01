@@ -107,10 +107,13 @@ class LoginWindow(tk.Frame):
 
         if user["role"] == "customer":
             from .customer.customer_window import CustomerWindow
-            CustomerWindow(self.master, self.db, user)
+            master.current_user = user  # Store current user
+            master.switch_frame(CustomerWindow, db, user)
+            self.destroy()
         else:
             from .manager.manager_window import ManagerWindow
-            ManagerWindow(self.master, self.db, user)
+            master.current_user = user  # Store current user
+            ManagerWindow(master, db, user)
 
     def _open_register(self):
         """

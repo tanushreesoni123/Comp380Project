@@ -4,6 +4,7 @@ from PIL import ImageTk, Image
 from datetime import datetime, timedelta
 
 from src.backend.database import DB
+from src.frontend.customer.seat_picker import SeatPicker 
 
 """
     The customer window for browsing available movies.
@@ -358,9 +359,17 @@ class ShowtimePopup(tk.Toplevel):
         self.selected_showtime = None
         self._build_ui()
     
-    def _select_seats(self):
-        """Handle seat selection"""
-        messagebox.showinfo("Seats", 
-                          f"Proceeding to seat selection for {self.movie['title']} at {self.selected_showtime}")
+    def _select_seats(self): #moves from showtime selection to seat selection
+        from src.frontend.customer.seat_picker import SeatPicker
+
+        # Close popup
         self.destroy()
+
+        # Switch main window to seat picker
+        self.master.switch_frame(
+            SeatPicker,
+            self.movie,
+            self.selected_showtime,
+            12.0
+        )
     
