@@ -280,4 +280,3 @@ class BookingService:
             """,
             (now_iso(), booking_id)
         )
-        
