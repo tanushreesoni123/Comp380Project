@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from src.frontend.login_window import LoginWindow
 class ManagerReportWindow(tk.Frame):
     def __init__(self, master, db):
         super().__init__(master, bg = "gray12")
@@ -64,8 +64,6 @@ class ManagerReportWindow(tk.Frame):
         
         #back button
         tk.Button(self, text = "Back", bg = "gray12", fg = "white",
-                  command = lambda: self.master.switch_frame(
-                      __import__('src.frontend.login_window', fromList=['LoginWindow']).LoginWindow,
-                      self.db
+                  command = lambda: self.master.switch_frame(LoginWindow,self.db
                   )).pack(pady = 20)
     
