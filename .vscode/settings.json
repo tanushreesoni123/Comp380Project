@@ -1,4 +1,7 @@
 {
-  "python-envs.defaultEnvManager": "ms-python.python:system",
-  "postman.settings.dotenv-detection-notification-visibility": false
+    "python.testing.pytestArgs": [
+        "src"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
