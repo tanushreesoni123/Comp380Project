@@ -174,7 +174,7 @@ class SeatPicker(tk.Toplevel):
 
                 if seat_taken:
                     seat.availability = "taken"
-                    seat_button.config(bg = "firebrick4", fg = "white", state = "disabled")
+                    seat_button.config(bg = "firebrick4", fg = "white")
 
                 else: 
                     seat_button.config(bg = "gray20", fg = "white",  height = 3, width = 6,
