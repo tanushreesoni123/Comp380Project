@@ -1,10 +1,11 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+#from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from src.backend.services.movies_service import MovieService
-from src.backend.database import DB
+#from src.backend.database import DB
+from src.frontend.customer.seat_picker import SeatPicker 
 
 """
     The customer window for browsing available movies.
@@ -308,7 +309,7 @@ class ShowtimePopup(tk.Toplevel):
                 for showtime in showtimes:
                     dtime = datetime.strptime(showtime["show_datetime"], "%Y-%m-%d %H:%M:%S")
                     btn_txt = (
-                        f"{dtime.strftime("%b %d, %Y - %I:%M%p ")} \n "
+                        f"{dtime.strftime('%b %d, %Y - %I:%M %p')}\n "
                         f"{showtime['theatre_name']} ({showtime['city']}) \n "
                         f"{showtime['screen_name']} | ${showtime['base_price']:.2f}"
                     )
@@ -378,7 +379,7 @@ class ShowtimePopup(tk.Toplevel):
         self.selected_showing = showtime
         dtime = datetime.strptime(showtime["show_datetime"], "%Y-%m-%d %H:%M:%S")
         self.selected_showtime = (
-            f"{dtime.strftime("%b %d, %Y - %I:%M%p ")} | "
+            f"{dtime.strftime('%b %d, %Y - %I:%M %p')} | "
             f"{showtime['theatre_name']} ({showtime['city']}) | "
             f"{showtime['screen_name']} | ${showtime['base_price']:.2f}"
         )

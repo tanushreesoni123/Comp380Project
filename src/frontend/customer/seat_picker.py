@@ -33,6 +33,9 @@ class SeatPicker(tk.Toplevel):
         self.booking_service = BookingService(self.db)
         self.taken_seats = self.booking_service.get_taken_seats(self.show["show_id"])
 
+        self.base_price = float(self.show["base_price"])
+        self.show_id = self.show["show_id"]
+
         window_width = 1000
         window_height = 800
 
@@ -197,7 +200,21 @@ class SeatPicker(tk.Toplevel):
 
 
     def checkout(self):
-        print("Done")
+        if not self.selected_seat_list:
+            messagebox.showwarning("No Seats", "Please select at least one seat.")
+            return
+
+        # Import inside to avoid circular import
+        from src.frontend.customer.payment_window import PaymentWindow
+
+        # Switch to payment screen
+        self.master.master.switch_frame(
+            PaymentWindow,
+            self.selected_seat_list,
+            self.base_price,
+            self.show_id
+        )
+        self.destroy()
 
 
     def return_to_showtime(self):
