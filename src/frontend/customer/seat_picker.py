@@ -14,7 +14,7 @@ class MovieSeat:
 
 
 class SeatPicker(tk.Frame):
-    def __init__(self, master, movie, showtime, base_price): ##added movie, showtime,m base_price
+    def __init__(self, master, movie, showtime, base_price, show_id=1): ##added movie, showtime, base_price, show_id
         super().__init__(master, bg = "gray12")
         self.master = master
         self.seats = {}
@@ -22,6 +22,7 @@ class SeatPicker(tk.Frame):
         self.movie = movie
         self.showtime = showtime #just added
         self.base_price = base_price #just added
+        self.show_id = show_id  # Store show_id
 
         window_width = 1000
         window_height = 800
@@ -140,7 +141,8 @@ class SeatPicker(tk.Frame):
         self.master.switch_frame(
             PaymentWindow,
             self.selected_seat_list,
-            self.base_price
+            self.base_price,
+            self.show_id
         )
 
     def return_to_showtime(self):

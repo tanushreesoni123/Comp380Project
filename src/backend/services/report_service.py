@@ -50,11 +50,10 @@ class ReportService:
             """
             SELECT m.title AS movie_title,
                    COUNT(b.booking_id) AS total_bookings
-            FROM bookings b
-            JOIN shows sh ON b.show_id = sh.show_id
-            JOIN movies m ON sh.movie_id = m.movie_id
-            WHERE b.status = 'CONFIRMED'
-            GROUP BY m.title
+            FROM movies m
+            LEFT JOIN shows sh ON m.movie_id = sh.movie_id
+            LEFT JOIN bookings b ON sh.show_id = b.show_id AND b.status = 'CONFIRMED'
+            GROUP BY m.movie_id, m.title
             ORDER BY total_bookings DESC
             """
         )
@@ -65,12 +64,11 @@ class ReportService:
         return self.db.query(
             """
             SELECT m.title AS movie_title,
-                   SUM(b.total_amount) AS revenue
-            FROM bookings b
-            JOIN shows sh ON b.show_id = sh.show_id
-            JOIN movies m ON sh.movie_id = m.movie_id
-            WHERE b.status = 'CONFIRMED'
-            GROUP BY m.title
+                   COALESCE(SUM(b.total_amount), 0) AS revenue
+            FROM movies m
+            LEFT JOIN shows sh ON m.movie_id = sh.movie_id
+            LEFT JOIN bookings b ON sh.show_id = b.show_id AND b.status = 'CONFIRMED'
+            GROUP BY m.movie_id, m.title
             ORDER BY revenue DESC
             """
         )

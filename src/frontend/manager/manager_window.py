@@ -1,11 +1,13 @@
 import tkinter as tk
 from src.frontend.login_window import LoginWindow
+from src.backend.services.report_service import ReportService
 class ManagerReportWindow(tk.Frame):
     def __init__(self, master, db):
         super().__init__(master, bg = "gray12")
         
         self.db = db
         self.pack(fill="both", expand=True)
+        self.report_service = ReportService(self.db)
 
         self._build_ui()
 
@@ -14,54 +16,40 @@ class ManagerReportWindow(tk.Frame):
                 bg="gray12", fg="sienna1",
                 font=("Helvetica", 18, "bold")).pack(pady=20)
         
-        #mock data, delete when backend is available
-        summary = {
-            "total_tickets": 102, 
-            "total_revenue": 1450.00,
-            "avg_price": 12.00,
-            "total_bookings": 85,
-            "top_movie": "Interstellar"
-        }
+        try:
+            total_revenue = self.report_service.get_total_revenue()
+            total_bookings = self.report_service.get_total_bookings()
+            popular_movies = self.report_service.get_popular_movies()
+            revenue_per_movie = self.report_service.get_revenue_per_movie()
+
+        except Exception as e:
+           print("Report Error:", e)
+           total_revenue = 0
+           total_bookings = 0
+           popular_movies = []
+           revenue_per_movie = [] 
 
         #summary
-        summary_frame = tk.Frame(self, bg = "gray12")
-        summary_frame.pack(pady = 10)
-
-        tk.Label(summary_frame, text = f"Total Tickets Sold: {summary['total_tickets']}",
-                 bg = "gray12", fg = "white", font = ("Helvetica", 12)).pack(pady = 2)
+        tk.Label(self, text = f"Total Bookings: {total_bookings}",
+                 bg = "gray12", fg = "white").pack(pady = 5)
        
-        tk.Label(summary_frame, text = f"Total Revenue: {summary['total_tickets']}",
-                 bg = "gray12", fg = "white", font = ("Helvetica", 12)).pack(pady = 2)
+        tk.Label(self, text = f"Total Revenue: ${total_revenue:.2f}",
+                 bg = "gray12", fg = "white").pack(pady = 5)
         
-        tk.Label(summary_frame, text = f"Average Ticket Price: {summary['total_tickets']}",
-                 bg = "gray12", fg = "white", font = ("Helvetica", 12)).pack(pady = 2)
+        tk.Label(self, text = "Most Popular Movies",
+                 bg = "gray12", fg = "white", font = ("Helvetica", 14, "bold")).pack(pady = 10)
         
-        tk.Label(summary_frame, text = f"Total Bookings: {summary['total_tickets']}",
-                 bg = "gray12", fg = "white", font = ("Helvetica", 12)).pack(pady = 2)
+        for movie in popular_movies:
+            tk.Label(self, text = f"{movie['movie_title']} - {movie['total_bookings']} bookings",
+                     bg = "gray12", fg = "white").pack(anchor = "w")
+            
         
-        tk.Label(summary_frame, text = f"Top Movie: {summary['total_tickets']}",
-                 bg = "gray12", fg = "white", font = ("Helvetica", 12)).pack(pady = 2)
+        tk.Label(self, text = "Revenue by Movie", bg = "gray12", fg = "sienna1",
+                 font = ("Helvetica", 14, "bold")).pack(pady = 10)
         
-        #Divider
-        tk.Label(self, text = "Movie Breakdown", bg = "gray12", fg = "white",
-                 font = ("Helvetica", 16, "bold")).pack(pady = 10)
-        
-        #mock table data
-        movie_data = [
-            ("Interstellar", 40, 480),
-            ("Howl's Moving Castle", 30, 360),
-            ("Spiderverse", 25, 300)
-        ]
-
-        table_frame = tk.Frame(self, bg = "gray12")
-        table_frame.pack()
-
-        for movie, tickets, revenue in movie_data:
-            tk.Label(table_frame,
-                    text = f"{movie} - {tickets} - ${revenue}",
-                    bg = "gray12", fg = "white",
-                    font = ("Helvetica", 11)).pack(anchor="w", pady = 2)
-        
+        for movie in revenue_per_movie:
+            tk.Label(self, text = f"{movie['movie_title']} - ${movie['revenue']:.2f}",
+                     bg = "gray12", fg = "white").pack(anchor = "w")
         #back button
         tk.Button(self, text = "Back", bg = "gray12", fg = "white",
                   command = lambda: self.master.switch_frame(LoginWindow,self.db

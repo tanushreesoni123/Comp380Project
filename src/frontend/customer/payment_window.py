@@ -5,11 +5,12 @@ from src.backend.database import DB
 
 
 class PaymentWindow(tk.Frame):
-    def __init__(self, master, selected_seats, base_price):
+    def __init__(self, master, selected_seats, base_price, show_id=1):
         super().__init__(master, bg="gray12")
 
         self.selected_seats = selected_seats
         self.base_price = base_price
+        self.show_id = show_id  # Store the show_id
 
         self.pack(fill="both", expand=True)
 
@@ -100,9 +101,13 @@ class PaymentWindow(tk.Frame):
 
         # TEMP (replace with backend later)
         messagebox.showinfo("Success", "Payment processed!")
+        
+        # Get user_id from current user
+        user_id = self.master.current_user["user_id"] if self.master.current_user else 1
+        
         success, message, data = self.payment_service.make_payment(
-            user_id=1,
-            show_id=1,
+            user_id=user_id,
+            show_id=self.show_id,
             seat_labels=self.selected_seats,
             payment_method="CARD",
             card_number="1234567812345678",

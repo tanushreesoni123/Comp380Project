@@ -152,7 +152,7 @@ class CustomerWindow(tk.Frame):
         """
 
         print("selected:", movie["title"])
-        ShowtimePopup(self.master, movie)
+        ShowtimePopup(self.master, movie, self.db)
 
 #creates various cards using images/title (they're buttons that can be clicked on)
 class MovieCard(tk.Frame):
@@ -240,13 +240,15 @@ class ShowtimePopup(tk.Toplevel):
             Rebuilds the interface depending if a showtime has been selected
             or not.
     """
-    def __init__(self, parent, movie):
+    def __init__(self, parent, movie, db):
         """
         Initializes the popup window and sets intial state.
         """
         super().__init__(parent, bg="gray12")
         self.movie = movie
+        self.db = db
         self.selected_showtime = None
+        self.selected_show_id = None
         self.title(f"{movie['title']} - Select Showtime")
         self.geometry("400x350")
         self.configure(bg="gray12")
@@ -345,13 +347,44 @@ class ShowtimePopup(tk.Toplevel):
         close_btn.pack(pady=10)
     
     def _generate_showtimes(self):
-        """Generate 5 sample showtimes"""
-        times = ["2:00 PM", "4:30 PM", "7:00 PM", "9:30 PM", "11:00 PM"]
-        return times
+        """Fetch real showtimes for the movie from database"""
+        from src.backend.services.movies_service import MovieService
+        from datetime import datetime
+        try:
+            movie_service = MovieService(self.db)
+            # Get movie_id by title
+            movies = self.db.query("SELECT movie_id FROM movies WHERE title=?", (self.movie['title'],))
+            if not movies:
+                return []
+            
+            movie_id = movies[0]['movie_id']
+            shows = movie_service.get_shows_for_movie(movie_id)
+            
+            # Store show_id mapping for later
+            self.show_mapping = {}
+            showtimes = []
+            for show in shows:
+                # Parse time from show_datetime and convert to 12-hour format
+                time_part = show['show_datetime'].split(' ')[1][:5]  # Extract HH:MM
+                dt = datetime.strptime(time_part, "%H:%M")
+                time_str = dt.strftime("%I:%M %p")  # Convert to 12-hour format with AM/PM
+                
+                # Add screen name to differentiate multiple shows at same time
+                display_str = f"{time_str} ({show['screen_name']})"
+                self.show_mapping[display_str] = show['show_id']
+                showtimes.append(display_str)
+            
+            return showtimes if showtimes else ["2:00 PM", "4:30 PM", "7:00 PM", "9:30 PM", "11:00 PM"]
+        except Exception as e:
+            print(f"Error fetching showtimes: {e}")
+            return ["2:00 PM", "4:30 PM", "7:00 PM", "9:30 PM", "11:00 PM"]
     
     def _select_showtime(self, showtime):
         """Handle showtime selection"""
         self.selected_showtime = showtime
+        # Get the show_id for this showtime
+        if hasattr(self, 'show_mapping') and showtime in self.show_mapping:
+            self.selected_show_id = self.show_mapping[showtime]
         self._build_ui()
     
     def _go_back(self):
@@ -365,11 +398,13 @@ class ShowtimePopup(tk.Toplevel):
         # Close popup
         self.destroy()
 
-        # Switch main window to seat picker
+        # Switch main window to seat picker with show_id
+        show_id = getattr(self, 'selected_show_id', 1)  # Default to 1 if not found
         self.master.switch_frame(
             SeatPicker,
             self.movie,
             self.selected_showtime,
-            12.0
+            12.0,
+            show_id
         )
     
