@@ -1,7 +1,7 @@
 """
 Module: booking_service.py
-Author: Tanushree Soni Shivranjini Pandey
-Date: April 27, 2026
+Author: Tanushree Soni and Shivranjini Pandey
+Date: April 30, 2026
 
 Description:
 Handles backend booking logic including:
@@ -93,10 +93,6 @@ class BookingService:
         if not seat_labels:
             raise ValueError("Please select at least one seat.")
 
-<<<<<<< HEAD
-        # Normalize seat labels
-=======
->>>>>>> 15b1163 (commit to repo)
         normalized = []
         for seat in seat_labels:
             seat = seat.strip().upper()
@@ -194,7 +190,6 @@ class BookingService:
         except Exception:
             self.db.conn.rollback()
             raise
-<<<<<<< HEAD
 
     # ───────────────────────── BOOKING DETAILS ─────────────────────────
 
@@ -272,22 +267,16 @@ class BookingService:
             """,
             (user_id,)
         )
-=======
-        def create_booking(self, user_id, show_id, seat_labels):
-    
-    
-           """
-    Creates a new booking for selected seats.
 
-    Args:
-        user_id (int): ID of the user
-        show_id (int): ID of the show
-        seat_labels (list): List of selected seat labels
+    # ───────────────────────── CANCEL BOOKING ─────────────────────────
 
-    Returns:
-        dict: Booking confirmation including booking ID and total amount
-
-    Raises:
-        ValueError: If seats are invalid or already booked
-    """
->>>>>>> 15b1163 (commit to repo)
+    def cancel_booking(self, booking_id: int):
+        self.db.exec(
+            """
+            UPDATE bookings
+            SET status = 'CANCELED',
+                cancel_time = ?
+            WHERE booking_id = ?
+            """,
+            (now_iso(), booking_id)
+        )
