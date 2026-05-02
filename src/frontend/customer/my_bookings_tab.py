@@ -1,18 +1,9 @@
-#commented out all code prior to backend connection
-#UI is functional, I had hardcoded everything, but was unable
-#to connect to backend, so I commented out the code
-#so that everyone could see my logic 
-
-"""
 import tkinter as tk
 
 
 from datetime import datetime
 from src.backend.services.booking_service import BookingService
 
-#commented all lines of code with variables like movie/
-#theatre_name, screen_name, city, etc. 
-#need to use finalized backend to implement frontend properly
 
 
 class BookingCard(tk.Frame):
@@ -167,17 +158,26 @@ class BookingTab(tk.Frame):
                 "total_amount" : booking["total_amount"],
                 "status" : booking["status"],
                 "cancel_time" : booking["cancel_time"],
-                "title" : extra_info["movie_title"],
-                "show_datetime" : extra_info["show_datetime"],
+                "title" : booking["movie_title"],
+                "show_datetime" :  booking["show_datetime"],
+                "theatre_name" : booking["theatre_name"],
+                "city" : booking["city"], 
+                "screen_name" : booking["screen_name"],
                 "seat_labels" : extra_info["seats"]
             })
     
     
         #loops through our bookings to make an individual card/booking for each
+        if not bookings: 
+            no_bookings_label = tk.Label(self.scrollable_frame, 
+                text = "No bookings yet.", bg = "gray20", fg = "gray87", 
+                font = ("Helvetica", 18, "bold"), justify = "center")
+            no_bookings_label.pack(pady=40)
 
-        for booking in bookings:
-            card = BookingCard(self.scrollable_frame, booking, self.select_booking)
-            card.pack(fill = "x", padx = (10,20), pady = 10)
+        else:
+            for booking in bookings:
+                card = BookingCard(self.scrollable_frame, booking, self.select_booking)
+                card.pack(fill = "x", padx = (10,20), pady = 10)
 
     #refreshes in the case that a booking is canceled 
     def refresh_bookings(self):
@@ -351,6 +351,7 @@ class CancelBooking(tk.Toplevel):
         self.user = user
         self.booking = booking
         self.on_approve = on_approve
+        self.booking_service = BookingService(self.db)
 
         self.title("Cancel Booking")
         self.geometry("700x550")
@@ -407,6 +408,7 @@ class CancelBooking(tk.Toplevel):
 
     #updates booking status 
     def final_cancel(self):
+        self.booking_service.cancel_booking(self.booking["booking_id"])
         self.booking["status"] = "CANCELED"
         self.booking["cancel_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
