@@ -14,7 +14,7 @@ class ManagerReportWindow(tk.Frame):
     def _build_ui(self):
         tk.Label(self, text="Sales Report",
                 bg="gray12", fg="sienna1",
-                font=("Helvetica", 18, "bold")).pack(pady=20)
+                font=("Helvetica", 20, "bold")).pack(pady=20)
         
         try:
             total_revenue = self.report_service.get_total_revenue()
@@ -37,7 +37,7 @@ class ManagerReportWindow(tk.Frame):
                  bg = "gray12", fg = "white").pack(pady = 5)
         
         tk.Label(self, text = "Most Popular Movies",
-                 bg = "gray12", fg = "white", font = ("Helvetica", 14, "bold")).pack(pady = 10)
+                 bg = "gray12", fg = "sienna1", font = ("Helvetica", 14, "bold")).pack(pady = 10)
         
         for movie in popular_movies:
             tk.Label(self, text = f"{movie['movie_title']} - {movie['total_bookings']} bookings",

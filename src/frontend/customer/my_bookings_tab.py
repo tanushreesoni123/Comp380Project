@@ -195,10 +195,8 @@ class BookingTab(tk.Frame):
 
     #takes you back to available movie window
     def return_to_movies(self):
-        if self.on_return:
-            self.destroy()
-            from .customer.customer_window import CustomerWindow
-            CustomerWindow(self.master, self.db, self.user)
+        from src.frontend.customer.customer_window import CustomerWindow
+        self.master.switch_frame(CustomerWindow, self.db, self.user)
 
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
