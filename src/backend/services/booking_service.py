@@ -249,9 +249,12 @@ class BookingService:
         return self.db.query(
             """
             SELECT b.booking_id,
+                   b.user_id,
+                   b.show_id,
                    b.total_amount,
                    b.booking_time,
                    b.status,
+                   b.cancel_time,
                    m.title AS movie_title,
                    sh.show_datetime,
                    th.name AS theatre_name,

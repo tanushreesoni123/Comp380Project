@@ -81,10 +81,10 @@ class LoginWindow(tk.Frame):
         register_btn.bind("<Enter>", lambda e: e.widget.config(fg="lightsalmon"))
         register_btn.bind("<Leave>", lambda e: e.widget.config(fg="sienna1"))
 
-
-        #adding a button for manager login
-        tk.Button(self, text = "Manager Login", bg = "gray12", fg = "white",
-                  command = self._manager_login).pack(pady = 10)
+        # manager login button moved into the login card for visibility
+        tk.Button(container, text="Manager Login", bg="gray27", fg="white",
+                  font=("Helvetica", 10, "bold"), relief="flat",
+                  command=self._manager_login, width=20).pack(pady=(10, 0))
         
     def _do_login(self):
         """
@@ -132,9 +132,8 @@ class LoginWindow(tk.Frame):
 
     #manager login method
     def _manager_login(self):
-        print("Manager button clicked")  # DEBUG
-
         from src.frontend.manager.manager_window import ManagerReportWindow
-
         self.master.switch_frame(ManagerReportWindow, self.db)
+        self.destroy()
         
+
