@@ -41,21 +41,9 @@ class CustomerWindow(tk.Frame):
 
         self.db =db
         self.user = user
-        self.master.eval('tk::PlaceWindow . center')
         self.movies_service = MovieService(self.db)
         self.configure(bg = "gray12")
 
-        #wanted a bigger window display
-        window_width = 1000
-        window_height = 800
-
-        screen_width = self.master.winfo_screenwidth()
-        screen_height = self.master.winfo_screenheight()
-
-        x = int((screen_width / 2) - (window_width / 2))
-        y = int((screen_height / 2) - (window_height / 2))
-
-        self.master.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.pack(fill = "both", expand = True)
         self.build_ui()
 
@@ -76,9 +64,20 @@ class CustomerWindow(tk.Frame):
         self.top = tk.Frame(self, bg = "gray12")
         self.top.pack(fill = "x", padx = 20)
 
+        # Title on the left
         self.available_movies = tk.Label(self.top, text = "Now Playing", bg = "gray12",
                                     fg = "white", font = ("Helvetica", 17, "bold"))
-        self.available_movies.pack(anchor = "n", padx = 10, pady = 10)
+        self.available_movies.pack(side = "left", anchor = "n", padx = 10, pady = 10)
+
+        # Booking history button on the right
+        self.booking_history_btn = tk.Button(self.top, text = "My Bookings", bg = "sienna1", fg = "gray12",
+                                           font = ("Helvetica", 10, "bold"), command = self.view_booking_history)
+        self.booking_history_btn.pack(side = "right", anchor = "n", padx = 10, pady = 10)
+
+        # Logout button next to boking history button
+        self.logout_btn = tk.Button(self.top, text = "Logout", bg = "sienna1", fg="gray12", 
+                                    font = ("Helvetica", 10, "bold"), command = self._go_back)
+        self.logout_btn.pack(side = "right", anchor = "n", padx = 20, pady = 10)
 
 
         movie_list_container = tk.Frame(self, bg=  "gray13")
@@ -158,6 +157,20 @@ class CustomerWindow(tk.Frame):
 
     def unbind_to_mousewheel(self, event):
         self.canvas.unbind_all("<MouseWheel>")
+
+    def view_booking_history(self):
+        """Navigate to booking history screen"""
+        from src.frontend.customer.my_bookings_tab import BookingTab
+        self.master.switch_frame(BookingTab, self.db, self.user, None)
+
+    def _go_back(self):
+        # go back to login screen
+        from src.frontend.login_window import LoginWindow
+        master = self.master
+        db = self.db
+        self.destroy()
+        LoginWindow(master, db)
+
 
 #creates various cards using images/title (they're buttons that can be clicked on)
 class MovieCard(tk.Frame):

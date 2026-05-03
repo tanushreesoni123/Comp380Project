@@ -12,8 +12,8 @@ class App(tk.Tk):
         self.title("A.D.S.T Movie Booking")
         self.configure(bg="gray12")
 
-        window_width = 600
-        window_height = 500
+        window_width = 1000
+        window_height = 600
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
