@@ -237,7 +237,7 @@ def seed_if_empty(db: DB):
         days = [today, today + timedelta(days=1)]  # today + tomorrow
 
         for movie in movies:
-            for screen in screens[:2]:
+            for screen in screens:
                 for day in days:
                     for time_str, price in zip(fixed_times, prices):
                         show_datetime = f"{day} {time_str}"
