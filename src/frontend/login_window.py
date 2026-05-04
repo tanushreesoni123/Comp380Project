@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 from src.backend.services.auth_service import AuthService
 """
     A window to login returning customers.
@@ -132,8 +132,19 @@ class LoginWindow(tk.Frame):
 
     #manager login method
     def _manager_login(self):
-        from src.frontend.manager.manager_window import ManagerReportWindow
-        self.master.switch_frame(ManagerReportWindow, self.db)
-        self.destroy()
+        password = simpledialog.askstring(
+            "Manager Login", 
+            "Enter manager password:",
+            show = "*", 
+            parent = self
+            )
+        if password is None: 
+            return
+
+        if password == "admin123":
+            from src.frontend.manager.manager_window import ManagerReportWindow
+            self.master.switch_frame(ManagerReportWindow, self.db)
+        else: 
+            messagebox.showerror("Manager Login Failed", "Incorrect manager password.")
         
 

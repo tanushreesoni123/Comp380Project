@@ -187,7 +187,7 @@ class BookingConfirmation(tk.Frame):
 
         tk.Label(container, text=f"Seats: {', '.join(self.booking['seats'])}",
                  bg="gray12", fg="white",
-                 font=("Helvetica", 12)).pack(anchor="w", pady=5)
+                 font=("Helvetica", 12), wraplength = 500).pack(anchor="w", pady=5)
 
         tk.Label(container, text=f"Total Paid: ${self.booking['total_amount']:.2f}",
                  bg="gray12", fg="sienna1",

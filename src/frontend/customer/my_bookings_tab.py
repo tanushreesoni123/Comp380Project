@@ -36,7 +36,7 @@ class BookingCard(tk.Frame):
 
 
         self.booking_button = tk.Button(self, text = button_text, bg = "gray21", fg = "gray87",
-            font = ("Helvetica", 14, "bold"), justify = "left", anchor = "center", command = self.handle_click)
+            font = ("Helvetica", 14, "bold"), justify = "left", anchor = "center", wraplength = 500, command = self.handle_click)
 
 
         self.booking_button.pack(fill = "x")
@@ -67,8 +67,26 @@ class BookingTab(tk.Frame):
         self.user = user
         self.on_return = on_return
 
+
+        self.parent.eval('tk::PlaceWindow . center')
         self.booking_service = BookingService(self.db)
+
+
+        window_width = 1000
+        window_height = 800
+
+
+        screen_width = self.master.winfo_screenwidth()
+        screen_height = self.master.winfo_screenheight()
+
+
+        x = int((screen_width / 2) - (window_width / 2))
+        y = int((screen_height / 2) - (window_height / 2))
+
+
+        self.master.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.pack(fill = "both", expand = True)
+
 
         self.build_ui()
 
@@ -83,12 +101,7 @@ class BookingTab(tk.Frame):
 
         self.bookings_title = tk.Label(self.top, text = "Booking History", bg = "gray20",
                                     fg = "gray87", font = ("Helvetica", 27, "bold"))
-        self.bookings_title.pack(side = "left", anchor = "n", padx = 10, pady = 20)
-
-         # Logout button 
-        self.logout_btn = tk.Button(self.top, text = "Logout", bg = "sienna1", fg="gray12", 
-                                    font = ("Helvetica", 10, "bold"), command = self._go_back)
-        self.logout_btn.pack(side = "right", anchor = "n", padx = 10, pady = 35)
+        self.bookings_title.pack(anchor = "n", padx = 10, pady = 20)
 
 
         #a container to hold all of the different bookings (and making it scrollable)
@@ -123,9 +136,6 @@ class BookingTab(tk.Frame):
         self.return_button = tk.Button(self.bottom, text = "Return to Movies", bg = "sienna1", fg = "gray12",
                       font =("Helvetica", 12),
                      highlightbackground = "gray25", height = 3, width = 14, command = self.return_to_movies)
-
-
-
 
 
         self.return_button.pack(side = "right", padx = 20, pady=10)
@@ -185,8 +195,8 @@ class BookingTab(tk.Frame):
 
     #takes you back to available movie window
     def return_to_movies(self):
-        from src.frontend.customer.customer_window import CustomerWindow
-        self.master.switch_frame(CustomerWindow, self.db, self.user)
+            from src.frontend.customer.customer_window import CustomerWindow
+            self.master.switch_frame(CustomerWindow, self.db, self.user)
 
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
@@ -196,14 +206,6 @@ class BookingTab(tk.Frame):
 
     def unbind_to_mousewheel(self, event):
         self.canvas.unbind_all("<MouseWheel>")
-
-    def _go_back(self):
-        # go back to login screen
-        from src.frontend.login_window import LoginWindow
-        master = self.master
-        db = self.db
-        self.destroy()
-        LoginWindow(master, db)
 
 
 
@@ -262,7 +264,7 @@ class TicketPopup(tk.Toplevel):
 
         #frames general ticket info
         self.booking_info = tk.Label(self.top, text = ticket_text_top, bg = "snow2", fg = "gray7",
-                            font =("Times", 17, "bold"), wraplength = 500)
+                            font =("Times", 17, "bold"), wraplength = 300)
         self.booking_info.pack(side = "top", anchor = "n", padx = 50, pady = 20)
 
         #frames ticket quantity/seats
@@ -413,14 +415,6 @@ class CancelBooking(tk.Toplevel):
 
         self.destroy()
 
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("BookingTabWindow")
-    fake_db = None
-    fake_user = {"user_id":1, "name" : "dt"}
-    app = BookingTab(root, fake_db, fake_user, on_return = None)
-    root.mainloop()
 
 
 
