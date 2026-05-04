@@ -218,11 +218,6 @@ def seed_if_empty(db: DB):
                 " VALUES(?,?,?,?)",
                 (tid, "Screen 1", 6, 8)
             )
-            db.exec(
-                "INSERT INTO screens(theatre_id,name,rows,cols)"
-                " VALUES(?,?,?,?)",
-                (tid, "Screen 2", 5, 7)
-            )
 
     # ── Shows ────────────────────────────────────────────
     if not db.query("SELECT 1 FROM shows LIMIT 1"):
