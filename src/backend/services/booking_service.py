@@ -133,6 +133,12 @@ class BookingService:
                 )
 
             self.db.conn.commit()
+            return {
+                "booking_id": booking_id,
+                "show_id": show_id,
+                "seat_labels": normalized,
+                "total_amount": total_amount,
+}
         except Exception as e:
             self.db.conn.rollback()
             raise e
