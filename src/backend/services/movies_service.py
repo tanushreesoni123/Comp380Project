@@ -58,6 +58,7 @@ class MovieService:
                JOIN screens sc ON sh.screen_id = sc.screen_id
                JOIN theatres th ON sc.theatre_id = th.theatre_id
                WHERE sh.movie_id = ?
+                AND sh.show_datetime >= CURRENT_TIMESTAMP
                ORDER BY sh.show_datetime""",
             (movie_id,)
         )

@@ -229,21 +229,29 @@ def seed_if_empty(db: DB):
         movies  = db.query("SELECT movie_id FROM movies")
         screens = db.query("SELECT screen_id FROM screens")
 
-        base_times = [
-            datetime.now() + timedelta(hours=2),
-            datetime.now() + timedelta(hours=5),
-            datetime.now() + timedelta(days=1, hours=3),
-            datetime.now() + timedelta(days=1, hours=7),
-        ]
-        prices = [12.0, 14.0, 11.0, 13.0]
+        # Fixed showtimes
+        fixed_times = ["14:00:00", "17:30:00", "20:30:00"]
+        prices = [12.0, 14.0, 16.0]
+
+        today = datetime.now().date()
+        days = [today, today + timedelta(days=1)]  # today + tomorrow
 
         for movie in movies:
             for screen in screens[:2]:
-                for showtime, price in zip(base_times[:2], prices[:2]):
-                    db.exec(
-                        "INSERT INTO shows(movie_id,screen_id,"
-                        "show_datetime,base_price) VALUES(?,?,?,?)",
-                        (movie["movie_id"], screen["screen_id"],
-                         showtime.strftime("%Y-%m-%d %H:%M:%S"), price)
-                    )
+                for day in days:
+                    for time_str, price in zip(fixed_times, prices):
+                        show_datetime = f"{day} {time_str}"
+
+                        db.exec(
+                            """
+                            INSERT INTO shows(movie_id, screen_id, show_datetime, base_price)
+                            VALUES (?, ?, ?, ?)
+                            """,
+                            (
+                                movie["movie_id"],
+                                screen["screen_id"],
+                                show_datetime,
+                                price
+                            )
+                        )
                     
