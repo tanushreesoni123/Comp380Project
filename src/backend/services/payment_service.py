@@ -1,8 +1,14 @@
 import uuid
+import os
+from dotenv import load_dotenv
 
 from src.backend.database import DB
 from src.backend.services.booking_service import BookingService
+from src.backend.services.email_service import EmailService
 from src.utils import now_iso
+
+# Load environment variables
+load_dotenv()
 
 
 class PaymentService:
@@ -52,6 +58,7 @@ class PaymentService:
         transaction_ref = self._generate_transaction_ref()
 
         try:
+            # ───────── INSERT PAYMENT ─────────
             self.db.exec(
                 """
                 INSERT INTO payments(
@@ -74,6 +81,47 @@ class PaymentService:
                     now_iso(),
                 ),
             )
+
+            # ───────── EMAIL INTEGRATION ─────────
+
+            try:
+                user = self.db.query(
+                    "SELECT name, email FROM users WHERE user_id = ?",
+                    (self._get_user_id_from_booking(booking_id),)
+                )[0]
+
+                email_service = EmailService(
+                    smtp_server="smtp.gmail.com",
+                    smtp_port=587,
+                    sender_email=os.getenv("EMAIL_USER"),
+                    sender_password=os.getenv("EMAIL_PASS"),
+                )
+
+                success, msg = email_service.send_booking_confirmation(
+                    to_email=user["email"],
+                    customer_name=user["name"],
+                    movie_title=booking["movie_title"],
+                    theatre_name=booking["theatre_name"],
+                    screen_name=booking["screen_name"],
+                    show_datetime=booking["show_datetime"],
+                    seat_labels=booking["seats"],
+                    total_amount=booking["total_amount"],
+                    booking_id=booking_id,
+                    transaction_ref=transaction_ref,
+                )
+
+                # fallback if email fails
+                if not success:
+                    print("\n--- EMAIL SIMULATION ---")
+                    print(f"To: {user['email']}")
+                    print(f"Booking ID: {booking_id}")
+                    print(f"Movie: {booking['movie_title']}")
+                    print(f"Seats: {', '.join(booking['seats'])}")
+                    print(f"Total: ${booking['total_amount']}")
+                    print("--- END EMAIL ---\n")
+
+            except Exception as e:
+                print("Email error:", e)
 
             return True, "Payment successful.", {
                 "booking_id": booking_id,
@@ -99,7 +147,14 @@ class PaymentService:
         )
         return rows[0] if rows else None
 
-    # ───────────────────────── HELPERS ─────────────────────────
+    # ───────────────────────── HELPER FUNCTIONS ─────────────────────────
+
+    def _get_user_id_from_booking(self, booking_id: int):
+        row = self.db.query(
+            "SELECT user_id FROM bookings WHERE booking_id = ?",
+            (booking_id,)
+        )
+        return row[0]["user_id"] if row else None
 
     def _validate_card(
         self,

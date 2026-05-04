@@ -14,15 +14,8 @@ Handles backend booking logic including:
 - sending email confirmation
 """
 
-import os
-from dotenv import load_dotenv
-
 from src.backend.database import DB
 from src.utils import now_iso
-from src.backend.services.email_service import EmailService
-
-# Load environment variables
-load_dotenv()
 
 
 class BookingService:
@@ -140,56 +133,9 @@ class BookingService:
                 )
 
             self.db.conn.commit()
-
-            # ───────── EMAIL INTEGRATION ─────────
-
-            try:
-                user = self.get_user_details(user_id)
-                details = self.get_booking_details(booking_id)
-
-                if user and details:
-                    email_service = EmailService(
-                        smtp_server="smtp.gmail.com",
-                        smtp_port=587,
-                        sender_email=os.getenv("EMAIL_USER"),
-                        sender_password=os.getenv("EMAIL_PASS"),
-                    )
-
-                    success, msg = email_service.send_booking_confirmation(
-                        to_email=user["email"],
-                        customer_name=user["name"],
-                        movie_title=details["movie_title"],
-                        theatre_name=details["theatre_name"],
-                        screen_name=details["screen_name"],
-                        show_datetime=details["show_datetime"],
-                        seat_labels=details["seats"],
-                        total_amount=details["total_amount"],
-                        booking_id=booking_id,
-                        transaction_ref=None,
-                    )
-
-                    if not success:
-                        print("\n--- EMAIL SIMULATION ---")
-                        print(f"To: {user['email']}")
-                        print(f"Booking ID: {booking_id}")
-                        print(f"Movie: {details['movie_title']}")
-                        print(f"Seats: {', '.join(details['seats'])}")
-                        print(f"Total: ${details['total_amount']}")
-                        print("--- END EMAIL ---\n")
-
-            except Exception as e:
-                print("Email error:", e)
-
-            return {
-                "booking_id": booking_id,
-                "show_id": show_id,
-                "seat_labels": normalized,
-                "total_amount": total_amount,
-            }
-
-        except Exception:
+        except Exception as e:
             self.db.conn.rollback()
-            raise
+            raise e
 
     # ───────────────────────── BOOKING DETAILS ─────────────────────────
 
