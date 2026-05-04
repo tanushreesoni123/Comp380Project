@@ -128,6 +128,7 @@ class PaymentService:
                 "transaction_ref": transaction_ref,
                 "amount": booking["total_amount"],
                 "payment_method": method,
+                "email_sent": success
             }
 
         except Exception as e:
