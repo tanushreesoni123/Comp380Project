@@ -203,10 +203,6 @@ def seed_if_empty(db: DB):
             "INSERT INTO theatres(name,city,address) VALUES(?,?,?)",
             ("Downtown Cinema", "Los Angeles", "123 Main St")
         )
-        db.exec(
-            "INSERT INTO theatres(name,city,address) VALUES(?,?,?)",
-            ("Westside Multiplex", "Santa Monica", "456 Ocean Ave")
-        )
 
     # ── Screens ──────────────────────────────────────────
     if not db.query("SELECT 1 FROM screens LIMIT 1"):
