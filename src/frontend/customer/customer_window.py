@@ -67,21 +67,21 @@ class CustomerWindow(tk.Frame):
         # Title on the left
         self.available_movies = tk.Label(self.top, text = "Now Playing", bg = "gray12",
                                     fg = "white", font = ("Helvetica", 17, "bold"))
-        self.available_movies.pack(side = "left", anchor = "n", padx = 10, pady = 10)
+        self.available_movies.pack(side = "left", anchor = "n", padx = 10, pady = (25,10))
 
         # Booking history button on the right
         self.booking_history_btn = tk.Button(self.top, text = "My Bookings", bg = "sienna1", fg = "gray12",
                                            font = ("Helvetica", 10, "bold"), command = self.view_booking_history)
-        self.booking_history_btn.pack(side = "right", anchor = "n", padx = 10, pady = 10)
+        self.booking_history_btn.pack(side = "right", anchor = "n", padx = 10, pady = (25,10))
 
         # Logout button next to boking history button
         self.logout_btn = tk.Button(self.top, text = "Logout", bg = "sienna1", fg="gray12", 
                                     font = ("Helvetica", 10, "bold"), command = self._go_back)
-        self.logout_btn.pack(side = "right", anchor = "n", padx = 20, pady = 10)
+        self.logout_btn.pack(side = "right", anchor = "n", padx = 20, pady = (25,10))
 
 
         movie_list_container = tk.Frame(self, bg=  "gray13")
-        movie_list_container.pack(expand = True, fill = "both", padx=10, pady=20)
+        movie_list_container.pack(expand = True, fill = "both", padx=10, pady=(10,20))
 
         self.canvas = tk.Canvas(movie_list_container, bg = "gray13", highlightthickness = 0, bd = 0)
         self.canvas.pack(side = "left", fill = "both", expand = True)
@@ -166,10 +166,7 @@ class CustomerWindow(tk.Frame):
     def _go_back(self):
         # go back to login screen
         from src.frontend.login_window import LoginWindow
-        master = self.master
-        db = self.db
-        self.destroy()
-        LoginWindow(master, db)
+        self.master.switch_frame(LoginWindow, self.db)
 
 
 #creates various cards using images/title (they're buttons that can be clicked on)
@@ -197,7 +194,7 @@ class MovieCard(tk.Frame):
         self.movie = movie
         self.on_click = on_click
         im = Image.open(movie["image"])
-        im = im.resize((120, 150) )
+        im = im.resize((120, 170) )
         self.photo = ImageTk.PhotoImage(im)
 
         self.image_button = tk.Button(self, image = self.photo,
@@ -299,22 +296,22 @@ class ShowtimePopup(tk.Toplevel):
         # Title label
         title_label = tk.Label(self.main_frame, text=f"{self.movie['title']}", 
                               bg="gray12", fg="sienna1", 
-                              font=("Helvetica", 16, "bold"))
+                              font=("Helvetica", 24, "bold"))
         title_label.pack(pady=15)
         
         if self.selected_showtime is None:
             # Show showtimes selection
             showtimes_label = tk.Label(self.main_frame, text="Available Showtimes:", 
                                       bg="gray12", fg="white",
-                                      font=("Helvetica", 12, "bold"))
-            showtimes_label.pack(anchor="w", pady=(10, 5))
+                                      font=("Helvetica", 16, "bold"))
+            showtimes_label.pack(anchor="w", pady=(10, 5), padx = 25)
             
             # Generate 5 sample showtimes
             showtimes = self._generate_showtimes()
             
             if not showtimes:
                 no_showtimes = tk.Label(self.main_frame, text = "No available showtimes", 
-                               bg = "gray12", fg = "white", font = ("Helvetica", 12, "bold"))
+                               bg = "gray12", fg = "white", font = ("Helvetica", 16, "bold"))
                 no_showtimes.pack(pady = 10)
 
             else: 
@@ -328,8 +325,8 @@ class ShowtimePopup(tk.Toplevel):
                     )
                     btn = tk.Button(self.main_frame, text=btn_txt, 
                                 bg="gray17", fg="sienna1",
-                                font=("Helvetica", 11),
-                                width=25,
+                                font=("Helvetica", 12),
+                                width=30,
                                 command=lambda st=showtime: self._select_showtime(st))
                     btn.pack(pady=5)
                 
@@ -340,7 +337,7 @@ class ShowtimePopup(tk.Toplevel):
             # Show selected showtime and seat selection option
             selected_label = tk.Label(self.main_frame, text="Selected Showtime:", 
                                      bg="gray12", fg="white",
-                                     font=("Helvetica", 12, "bold"))
+                                     font=("Helvetica", 14, "bold"))
             selected_label.pack(pady=(10, 5))
             
             time_display = tk.Label(self.main_frame, text=self.selected_showtime, 
@@ -352,7 +349,7 @@ class ShowtimePopup(tk.Toplevel):
             # Select Seats button
             seats_btn = tk.Button(self.main_frame, text="Select Seats", 
                                  bg="sienna1", fg="gray12",
-                                 font=("Helvetica", 12, "bold"),
+                                 font=("Helvetica", 14, "bold"),
                                  padx=20, pady=10,
                                  command=self._select_seats)
             seats_btn.pack(pady=20)
@@ -364,7 +361,7 @@ class ShowtimePopup(tk.Toplevel):
             # Go Back button
             back_btn = tk.Button(self.main_frame, text="Go Back", 
                                 bg="gray17", fg="sienna1",
-                                font=("Helvetica", 10),
+                                font=("Helvetica", 12),
                                 command=self._go_back)
             back_btn.pack(pady=5)
             
@@ -375,7 +372,7 @@ class ShowtimePopup(tk.Toplevel):
         # Close button (always visible)
         close_btn = tk.Button(self.main_frame, text="Close", 
                             bg="gray17", fg="white",
-                            font=("Helvetica", 10),
+                            font=("Helvetica", 12),
                             command=self.destroy)
         close_btn.pack(pady=10)
     

@@ -41,7 +41,7 @@ class ManagerReportWindow(tk.Frame):
         
         for movie in popular_movies:
             tk.Label(self, text = f"{movie['movie_title']} - {movie['total_bookings']} bookings",
-                     bg = "gray12", fg = "white").pack(anchor = "w")
+                     bg = "gray12", fg = "white").pack(anchor = "w", padx = 20)
             
         
         tk.Label(self, text = "Revenue by Movie", bg = "gray12", fg = "sienna1",
@@ -49,7 +49,7 @@ class ManagerReportWindow(tk.Frame):
         
         for movie in revenue_per_movie:
             tk.Label(self, text = f"{movie['movie_title']} - ${movie['revenue']:.2f}",
-                     bg = "gray12", fg = "white").pack(anchor = "w")
+                     bg = "gray12", fg = "white").pack(anchor = "w", padx = 20)
         #back button
         tk.Button(self, text = "Back", bg = "gray12", fg = "white",
                   command = lambda: self.master.switch_frame(LoginWindow,self.db
